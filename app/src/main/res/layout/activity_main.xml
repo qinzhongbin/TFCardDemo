@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/initRes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="初始化资源" />
+
+    <Button
+        android:id="@+id/exportStoreId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="导出设备序列号" />
+
+    <Button
+        android:id="@+id/mockC2SNegotiateKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="模拟C2S协商密钥" />
+
+    <Button
+        android:id="@+id/mockGetKeyHandle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="模拟获取密钥句柄" />
+
+    <Button
+        android:id="@+id/getSoftKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="获取软密钥" />
+
+    <Button
+        android:id="@+id/queryKeyLength"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="查询密钥长度（字节）" />
+
+    <Button
+        android:id="@+id/onlineChargingKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="在线充注密钥" />
+
+    <Button
+        android:id="@+id/destroyRes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="销毁资源" />
+
+    <Button
+        android:id="@+id/hardEncrypt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="硬加密" />
+
+    <Button
+        android:id="@+id/hardDecrypt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="硬解密" />
+
+    <Button
+        android:id="@+id/softEncrypt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="软加密" />
+
+    <Button
+        android:id="@+id/softDecrypt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="软解密" />
+
+    <EditText
+        android:id="@+id/plain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="输入明文" />
+</LinearLayout>

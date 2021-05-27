@@ -1,0 +1,3 @@
+rootProject.name = "TF Card Demo"
+include ':app'
+include ':tfcard'
