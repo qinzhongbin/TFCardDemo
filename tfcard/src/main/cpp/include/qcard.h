@@ -37,7 +37,7 @@ QCARD_API int QCard_Android_EnumStoreHandle(QHANDLES *phStoreHandles, char *pcPa
 * Output         : phStoreHandle : 安全存储区句柄列表,使用QCard_QHANDLE_Free释放
 * Return         : 成功返回安全存储区个数, 其它返回错误值
 *******************************************************************************/
-QCARD_API int QCard_EnumStoreHandle(QHANDLES *phStoreHandles, char *pcPackageName);
+QCARD_API int QCard_EnumStoreHandle(QHANDLES *phStoreHandles, char *pcPackageName, char *appPath);
 
 /*******************************************************************************
 * Function Name  : QCard_EnumSpecifiedTypeStoreHandle

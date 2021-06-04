@@ -8,12 +8,6 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/initRes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="初始化资源" />
-
-    <Button
         android:id="@+id/exportStoreId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

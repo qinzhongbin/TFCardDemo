@@ -18,6 +18,9 @@ add_library(TFCard SHARED ${SRC_DIR})
 # 链接
 target_link_libraries(TFCard
         skf
+        ssl
+        curl
+        crypto
         SdCryptoStor
         qtf3302
         log)
