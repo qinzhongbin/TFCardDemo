@@ -1,9 +1,11 @@
 package com.qasky.tfcarddemo;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import com.blankj.utilcode.util.ConvertUtils;
@@ -14,19 +16,21 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.qasky.tfcard.C2SNegotiateInfo;
 import com.qasky.tfcard.TFCard;
 
-import java.util.Arrays;
-
 public class MainActivity extends AppCompatActivity {
     TFCard mTFCard = new TFCard();
 
-    String pcAddr = "112.27.97.202:8890";
-    String pcAppName = "SCBCTS";
-    String pcConName = "SCBCTS";
-    String pcUserPin = "12222222";
+    String cts_pcAddr = "112.27.97.202:8890";
+    String cts_pcAppName = "SCBCTS";
+    String cts_pcConName = "SCBCTS";
+    String cts_pcUserPin = "12222222";
+    String ctc_pcAppName = "SCBCTC";
+    String ctc_pcConName = "SCBCTC";
+    String ctc_pcUserPin = "12222222";
 
     String mCipherHexString;
     private String pcSoreId;
     private final C2SNegotiateInfo c2SNegotiateInfo = new C2SNegotiateInfo();
+    byte[] softKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +41,21 @@ public class MainActivity extends AppCompatActivity {
             ToastUtils.showShort("TF卡不可用");
             return;
         }
+
+        ((SwitchCompat) findViewById(R.id.modeSwitch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    buttonView.setText("C2C");
+                    findViewById(R.id.container_c2s).setVisibility(View.GONE);
+                    findViewById(R.id.container_c2c).setVisibility(View.VISIBLE);
+                } else {
+                    buttonView.setText("C2S");
+                    findViewById(R.id.container_c2s).setVisibility(View.VISIBLE);
+                    findViewById(R.id.container_c2c).setVisibility(View.GONE);
+                }
+            }
+        });
 
         findViewById(R.id.exportStoreId).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,13 +75,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.mockC2SNegotiateKey).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.c2sNegotiateKey).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
                     @Override
                     public Boolean doInBackground() throws Throwable {
-                        return mTFCard.mockC2SNegotiateKey(pcAddr, pcAppName, pcConName, pcSoreId, c2SNegotiateInfo);
+                        return mTFCard.mockC2SNegotiateKey(cts_pcAddr, cts_pcAppName, cts_pcConName, pcSoreId, c2SNegotiateInfo);
                     }
 
                     @Override
@@ -74,13 +93,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.mockGetKeyHandle).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.getKeyHandleByC2S).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
                     @Override
                     public Boolean doInBackground() throws Throwable {
-                        return mTFCard.getKeyHandle(pcAppName, pcConName, pcUserPin, c2SNegotiateInfo.getCheckCode(), c2SNegotiateInfo.getFlag());
+                        return mTFCard.getKeyHandleByC2S(cts_pcAppName, cts_pcConName, cts_pcUserPin, c2SNegotiateInfo.getCheckCode(), c2SNegotiateInfo.getFlag());
                     }
 
                     @Override
@@ -91,80 +110,58 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.getSoftKey).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.getAuthSyncFlag).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
                     @Override
                     public String doInBackground() throws Throwable {
-                        byte[] bytes_softKey = mTFCard.getSoftKey();
-
-                        LogUtils.d(Arrays.toString(bytes_softKey));
-
-                        return ConvertUtils.bytes2HexString(bytes_softKey);
+                        String otherStoreId = ((EditText) findViewById(R.id.et_otherStoreId)).getText().toString();
+                        return mTFCard.getAuthSynFlag(otherStoreId, ctc_pcAppName, ctc_pcConName, ctc_pcUserPin);
                     }
 
                     @Override
-                    public void onSuccess(String result) {
-                        ToastUtils.showShort("软密钥：\n" + result);
+                    public void onSuccess(String flag) {
+                        LogUtils.d("C2C同步认证码：\n" + flag);
+                        ToastUtils.showShort("C2C同步认证码获取成功");
                     }
                 });
             }
         });
 
-        findViewById(R.id.queryKeyLength).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<int[]>() {
-                    @Override
-                    public int[] doInBackground() throws Throwable {
-                        return mTFCard.queryKeyLength(pcAppName, pcConName, pcSoreId);
-                    }
-
-                    @Override
-                    public void onSuccess(int[] result) {
-                        if (result != null) {
-                            ToastUtils.showShort("总长度：" + result[0]
-                                    + "\n已使用：" + result[1]
-                                    + "\n剩余量：" + result[2]);
-                        } else {
-                            ToastUtils.showShort("查询密钥失败");
-                        }
-                    }
-                });
-            }
-        });
-
-        findViewById(R.id.onlineChargingKey).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.c2cSyncAuth).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
                     @Override
                     public Boolean doInBackground() throws Throwable {
-                        return mTFCard.onlineChargingKey(pcAddr, pcAppName, pcConName, pcUserPin);
+                        String otherStoreId = ((EditText) findViewById(R.id.et_otherStoreId)).getText().toString();
+                        String authSynFlag = ((EditText) findViewById(R.id.et_authSynFlag)).getText().toString();
+                        return mTFCard.authSynFlag(otherStoreId, ctc_pcAppName, ctc_pcConName, ctc_pcUserPin, authSynFlag);
                     }
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        ToastUtils.showShort("密钥充注" + (result ? "成功\n密钥长度不少于2048" : "失败"));
+                        ToastUtils.showShort("C2C同步认证" + (result ? "成功" : "失败"));
                     }
                 });
             }
         });
 
-        findViewById(R.id.destroyRes).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.getKeyHandleByC2C).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Void>() {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
                     @Override
-                    public Void doInBackground() throws Throwable {
-                        mTFCard.destroyRes();
-                        return null;
+                    public Boolean doInBackground() throws Throwable {
+                        String otherStoreId = ((EditText) findViewById(R.id.et_otherStoreId)).getText().toString();
+                        String authSynFlag = ((EditText) findViewById(R.id.et_authSynFlag)).getText().toString();
+                        return mTFCard.getKeyHandleByC2C(otherStoreId, authSynFlag, ctc_pcAppName, ctc_pcConName, ctc_pcUserPin);
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
-                        ToastUtils.showShort("销毁资源成功");
+                    public void onSuccess(Boolean result) {
+                        ToastUtils.showShort("获取密钥句柄" + (result ? "成功" : "失败"));
                     }
                 });
             }
@@ -224,6 +221,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.exportSoftKey).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+                    @Override
+                    public String doInBackground() throws Throwable {
+                        softKey = mTFCard.getSoftKey();
+                        return ConvertUtils.bytes2HexString(softKey);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        ToastUtils.showShort("软密钥：\n" + result);
+                    }
+                });
+            }
+        });
+
         findViewById(R.id.softEncrypt).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -238,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
 
                         String paddedHexString = ConvertUtils.bytes2HexString(paddedBytes);
                         LogUtils.d("软加密明文：" + paddedHexString + "（已填充）");
-                        return mTFCard.sm4SoftEncrypt(paddedBytes, c2SNegotiateInfo.getSoftKey());
+                        return mTFCard.sm4SoftEncrypt(paddedBytes, softKey);
                     }
 
                     @Override
@@ -258,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
                     public byte[] doInBackground() throws Throwable {
                         LogUtils.d("软解密密文：" + mCipherHexString);
                         byte[] cipherBytes = ConvertUtils.hexString2Bytes(mCipherHexString);
-                        return mTFCard.sm4SoftDecrypt(cipherBytes, c2SNegotiateInfo.getSoftKey());
+                        return mTFCard.sm4SoftDecrypt(cipherBytes, softKey);
                     }
 
                     @Override
@@ -275,6 +290,64 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         LogUtils.d("软解密明文：" + new String(result, 0, plainLength));
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.queryKeyLength).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<int[]>() {
+                    @Override
+                    public int[] doInBackground() throws Throwable {
+                        return mTFCard.queryKeyLength(cts_pcAppName, cts_pcConName, pcSoreId);
+                    }
+
+                    @Override
+                    public void onSuccess(int[] result) {
+                        if (result != null) {
+                            ToastUtils.showShort("总长度：" + result[0]
+                                    + "\n已使用：" + result[1]
+                                    + "\n剩余量：" + result[2]);
+                        } else {
+                            ToastUtils.showShort("查询密钥失败");
+                        }
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.onlineChargingKey).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
+                    @Override
+                    public Boolean doInBackground() throws Throwable {
+                        return mTFCard.onlineChargingKey(cts_pcAddr, cts_pcAppName, cts_pcConName, cts_pcUserPin);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        ToastUtils.showShort("密钥充注" + (result ? "成功\n密钥长度不少于2048" : "失败"));
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.destroyRes).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Void>() {
+                    @Override
+                    public Void doInBackground() throws Throwable {
+                        mTFCard.destroyRes();
+                        return null;
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        ToastUtils.showShort("销毁资源成功");
                     }
                 });
             }

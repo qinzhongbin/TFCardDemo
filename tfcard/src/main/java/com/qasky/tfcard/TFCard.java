@@ -12,12 +12,6 @@ public class TFCard {
      */
     public native String getStoreId(String pkgName);
 
-
-    /**
-     * 销毁资源
-     */
-    public native void destroyRes();
-
     /**
      * 查询密钥长度（字节Byte）
      *
@@ -40,7 +34,7 @@ public class TFCard {
     public native boolean onlineChargingKey(String pcAddr, String pcAppName, String pcContainerName, String pcUserPin);
 
     /**
-     * 模拟C2S协商密钥
+     * C2S协商密钥
      *
      * @param pcAddr          服务器IP地址
      * @param pcAppName       应用名称
@@ -51,7 +45,7 @@ public class TFCard {
     public native boolean mockC2SNegotiateKey(String pcAddr, String pcAppName, String pcContainerName, String storeId, C2SNegotiateInfo c2SNegotiateInfo);
 
     /**
-     * 获取密钥句柄
+     * C2S获取密钥句柄
      *
      * @param pcAppName       应用名称
      * @param pcContainerName 容器名称
@@ -60,14 +54,33 @@ public class TFCard {
      * @param pcFlag          C2S协商数据
      * @return 是否获取成功
      */
-    public native boolean getKeyHandle(String pcAppName, String pcContainerName, String pcUserPin, String pcCheckCode, String pcFlag);
+    public native boolean getKeyHandleByC2S(String pcAppName, String pcContainerName, String pcUserPin, String pcCheckCode, String pcFlag);
 
     /**
-     * 初始化资源后，通过CTS协商获取软密钥
-     *
-     * @return 软密钥
+     * C2C获取认证同步码
+     * @param pcOtherStoreId    对端设备序列号
+     * @param pcAppName         应用名称
+     * @param pcContainerName   容器名称
+     * @param pcUserPin         容器名称
+     * @return  认证同步码
      */
-    public native byte[] getSoftKey();
+    public native String getAuthSynFlag(String pcOtherStoreId, String pcAppName, String pcContainerName, String pcUserPin);
+
+    /**
+     * C2C同步认证
+     * @param pcOtherStoreId    对端设备序列号
+     * @param pcAppName         应用名称
+     * @param pcContainerName   容器名称
+     * @param pcPin             容器名称
+     * @param pcFlag            对端认证同步码
+     * @return 是否认证成功
+     */
+    public native boolean authSynFlag(String pcOtherStoreId, String pcAppName, String pcContainerName, String pcPin, String pcFlag);
+
+    /**
+     * C2C获取密钥句柄
+     */
+    public native boolean getKeyHandleByC2C(String pcOtherStoreId, String pcFlag, String pcAppName, String pcContainerName, String pcPin);
 
     /**
      * 硬件加密
@@ -80,6 +93,11 @@ public class TFCard {
     public native byte[] hardDecrypt(byte[] data);
 
     /**
+     * 获取软密钥
+     */
+    public native byte[] getSoftKey();
+
+    /**
      * SM4软算法加密
      */
     public native byte[] sm4SoftEncrypt(byte[] data, byte[] key);
@@ -89,12 +107,8 @@ public class TFCard {
      */
     public native byte[] sm4SoftDecrypt(byte[] data, byte[] key);
 
-
-
-
     /**
-     * 获取校验同步码
-     * @return 校验同步码
+     * 销毁资源
      */
-    public native String readAuthSynFlag(String pcOtherStoreId, String pcAppName, String pcContainerName, String pcUserPin);
+    public native void destroyRes();
 }
