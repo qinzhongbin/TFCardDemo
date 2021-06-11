@@ -31,9 +31,8 @@ KEYHANDLE hKeyHandle = nullptr;
 QCard_BLOCKCIPHERPARAM KeyParam;
 
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_qasky_tfcard_TFCard_getStoreId(JNIEnv *env, jobject thiz, jstring pkg_name) {
-    char pcStoreId[32] = {0};
+JNIEXPORT jboolean JNICALL
+Java_com_qasky_tfcard_QTF_initRes(JNIEnv *env, jobject thiz, jstring pkg_name) {
     char *pkgName = const_cast<char *>(env->GetStringUTFChars(pkg_name, JNI_FALSE));
     LOGE("pkgName = %s", pkgName);
 
@@ -49,20 +48,28 @@ Java_com_qasky_tfcard_TFCard_getStoreId(JNIEnv *env, jobject thiz, jstring pkg_n
     LOGE("deviceNum = %d", ret);
     if (ret <= 0) {
         LOGE("QCard_EnumStoreHandle error: %x", ret);
-        return nullptr;
+        return JNI_FALSE;
     }
 
     ret = QCard_Login(phStoreHandles[0]);
     if (ret) {
         LOGE("QCard_Login error: %x", ret);
-        return nullptr;
+        return JNI_FALSE;
     }
 
     ret = QCard_InitResource(phStoreHandles[0]);
     if (ret) {
         LOGE("QCard_InitResource error: %x", ret);
-        return nullptr;
+        return JNI_FALSE;
     }
+    return JNI_TRUE;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_qasky_tfcard_QTF_exportStoreId(JNIEnv *env, jobject thiz) {
+    char pcStoreId[32] = {0};
+    int ret = 0;
 
     ret = QCard_GetStoreId(phStoreHandles[0], pcStoreId);
     if (ret) {
@@ -74,7 +81,7 @@ Java_com_qasky_tfcard_TFCard_getStoreId(JNIEnv *env, jobject thiz, jstring pkg_n
 
 extern "C"
 JNIEXPORT jintArray JNICALL
-Java_com_qasky_tfcard_TFCard_queryKeyLength(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name, jstring store_id) {
+Java_com_qasky_tfcard_QTF_queryKeyLength(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name, jstring store_id) {
     if (phStoreHandles == nullptr || phStoreHandles[0] == nullptr) {
         LOGE("设备句柄为空");
         return nullptr;
@@ -105,7 +112,7 @@ Java_com_qasky_tfcard_TFCard_queryKeyLength(JNIEnv *env, jobject thiz, jstring p
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_TFCard_onlineChargingKey(JNIEnv *env, jobject thiz, jstring pc_addr, jstring pc_app_name, jstring pc_container_name, jstring pc_user_pin) {
+Java_com_qasky_tfcard_QTF_onlineChargingKey(JNIEnv *env, jobject thiz, jstring pc_addr, jstring pc_app_name, jstring pc_container_name, jstring pc_user_pin) {
     if (phStoreHandles == nullptr || phStoreHandles[0] == nullptr) {
         LOGE("设备句柄为空");
         return JNI_FALSE;
@@ -133,7 +140,7 @@ Java_com_qasky_tfcard_TFCard_onlineChargingKey(JNIEnv *env, jobject thiz, jstrin
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_TFCard_mockC2SNegotiateKey(JNIEnv *env, jobject thiz, jstring pc_addr, jstring pc_app_name, jstring pc_container_name, jstring store_id, jobject c2s_negotiate_info) {
+Java_com_qasky_tfcard_QTF_mockC2SNegotiateKey(JNIEnv *env, jobject thiz, jstring pc_addr, jstring pc_app_name, jstring pc_container_name, jstring store_id, jobject c2s_negotiate_info) {
     if (store_id == nullptr) {
         LOGE("设备序列号为空");
         return JNI_FALSE;
@@ -201,7 +208,7 @@ Java_com_qasky_tfcard_TFCard_mockC2SNegotiateKey(JNIEnv *env, jobject thiz, jstr
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_TFCard_getKeyHandleByC2S(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name, jstring pc_user_pin, jstring pc_check_code, jstring pc_flag) {
+Java_com_qasky_tfcard_QTF_getKeyHandleByC2S(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name, jstring pc_user_pin, jstring pc_check_code, jstring pc_flag) {
     int ret = 0;
 
     char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
@@ -226,7 +233,7 @@ Java_com_qasky_tfcard_TFCard_getKeyHandleByC2S(JNIEnv *env, jobject thiz, jstrin
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_qasky_tfcard_TFCard_getAuthSynFlag(JNIEnv *env, jobject thiz, jstring pc_other_store_id, jstring pc_app_name, jstring pc_container_name, jstring pc_user_pin) {
+Java_com_qasky_tfcard_QTF_getAuthSynFlag(JNIEnv *env, jobject thiz, jstring pc_other_store_id, jstring pc_app_name, jstring pc_container_name, jstring pc_user_pin) {
     int ret = 0;
     char *pcFlag = nullptr;
     unsigned long ulFlagLen = 0;
@@ -261,7 +268,7 @@ Java_com_qasky_tfcard_TFCard_getAuthSynFlag(JNIEnv *env, jobject thiz, jstring p
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_TFCard_authSynFlag(JNIEnv *env, jobject thiz, jstring pc_other_store_id, jstring pc_app_name, jstring pc_container_name, jstring pc_pin, jstring pc_flag) {
+Java_com_qasky_tfcard_QTF_authSynFlag(JNIEnv *env, jobject thiz, jstring pc_other_store_id, jstring pc_app_name, jstring pc_container_name, jstring pc_pin, jstring pc_flag) {
     int ret = 0;
 
     char *pcOtherStoreId = const_cast<char *>(env->GetStringUTFChars(pc_other_store_id, JNI_FALSE));
@@ -286,7 +293,7 @@ Java_com_qasky_tfcard_TFCard_authSynFlag(JNIEnv *env, jobject thiz, jstring pc_o
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_TFCard_getKeyHandleByC2C(JNIEnv *env, jobject thiz, jstring pc_other_store_id, jstring pc_flag, jstring pc_app_name, jstring pc_container_name, jstring pc_pin) {
+Java_com_qasky_tfcard_QTF_getKeyHandleByC2C(JNIEnv *env, jobject thiz, jstring pc_other_store_id, jstring pc_flag, jstring pc_app_name, jstring pc_container_name, jstring pc_pin) {
     int ret = 0;
 
     char *pcOtherStoreId = const_cast<char *>(env->GetStringUTFChars(pc_other_store_id, JNI_FALSE));
@@ -311,7 +318,7 @@ Java_com_qasky_tfcard_TFCard_getKeyHandleByC2C(JNIEnv *env, jobject thiz, jstrin
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_TFCard_hardEncrypt(JNIEnv *env, jobject thiz, jbyteArray data) {
+Java_com_qasky_tfcard_QTF_hardEncrypt(JNIEnv *env, jobject thiz, jbyteArray data) {
     if (phStoreHandles == nullptr || phStoreHandles[0] == nullptr) {
         LOGE("设备句柄为空");
         return nullptr;
@@ -349,7 +356,7 @@ Java_com_qasky_tfcard_TFCard_hardEncrypt(JNIEnv *env, jobject thiz, jbyteArray d
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_TFCard_hardDecrypt(JNIEnv *env, jobject thiz, jbyteArray data) {
+Java_com_qasky_tfcard_QTF_hardDecrypt(JNIEnv *env, jobject thiz, jbyteArray data) {
     if (phStoreHandles == nullptr || phStoreHandles[0] == nullptr) {
         LOGE("设备句柄为空");
         return nullptr;
@@ -387,7 +394,7 @@ Java_com_qasky_tfcard_TFCard_hardDecrypt(JNIEnv *env, jobject thiz, jbyteArray d
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_TFCard_getSoftKey(JNIEnv *env, jobject thiz) {
+Java_com_qasky_tfcard_QTF_getSoftKey(JNIEnv *env, jobject thiz) {
     if (phStoreHandles == nullptr || phStoreHandles[0] == nullptr) {
         LOGE("设备句柄为空");
         return nullptr;
@@ -418,7 +425,7 @@ Java_com_qasky_tfcard_TFCard_getSoftKey(JNIEnv *env, jobject thiz) {
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_TFCard_sm4SoftEncrypt(JNIEnv *env, jobject thiz, jbyteArray data, jbyteArray key) {
+Java_com_qasky_tfcard_QTF_sm4SoftEncrypt(JNIEnv *env, jobject thiz, jbyteArray data, jbyteArray key) {
     int ret = 0;
 
     long len_src = env->GetArrayLength(data);
@@ -451,7 +458,7 @@ Java_com_qasky_tfcard_TFCard_sm4SoftEncrypt(JNIEnv *env, jobject thiz, jbyteArra
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_TFCard_sm4SoftDecrypt(JNIEnv *env, jobject thiz, jbyteArray data, jbyteArray key) {
+Java_com_qasky_tfcard_QTF_sm4SoftDecrypt(JNIEnv *env, jobject thiz, jbyteArray data, jbyteArray key) {
     int ret = 0;
 
     long len_src = env->GetArrayLength(data);
@@ -484,7 +491,7 @@ Java_com_qasky_tfcard_TFCard_sm4SoftDecrypt(JNIEnv *env, jobject thiz, jbyteArra
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_qasky_tfcard_TFCard_destroyRes(JNIEnv *env, jobject thiz) {
+Java_com_qasky_tfcard_QTF_destroyRes(JNIEnv *env, jobject thiz) {
     int ret = 0;
 
     if (phStoreHandles != nullptr && phStoreHandles[0]) {

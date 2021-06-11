@@ -13,10 +13,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} SRC_DIR)
 
 # 编译库
-add_library(TFCard SHARED ${SRC_DIR})
+add_library(QTF SHARED ${SRC_DIR})
 
 # 链接
-target_link_libraries(TFCard
+target_link_libraries(QTF
         skf
         ssl
         curl

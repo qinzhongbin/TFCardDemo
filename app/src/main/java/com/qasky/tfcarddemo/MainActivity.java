@@ -14,10 +14,10 @@ import com.blankj.utilcode.util.SDCardUtils;
 import com.blankj.utilcode.util.ThreadUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.qasky.tfcard.C2SNegotiateInfo;
-import com.qasky.tfcard.TFCard;
+import com.qasky.tfcard.QTF;
 
 public class MainActivity extends AppCompatActivity {
-    TFCard mTFCard = new TFCard();
+    QTF mQTF = new QTF();
 
     String cts_pcAddr = "112.27.97.202:8890";
     String cts_pcAppName = "SCBCTS";
@@ -57,13 +57,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.initRes).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
+                    @Override
+                    public Boolean doInBackground() throws Throwable {
+                        return mQTF.initRes(getPackageName());
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        ToastUtils.showShort("资源初始化" + (result ? "成功" : "失败"));
+                    }
+                });
+            }
+        });
+
         findViewById(R.id.exportStoreId).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
                     @Override
                     public String doInBackground() throws Throwable {
-                        return mTFCard.getStoreId(getPackageName());
+                        return mQTF.exportStoreId();
                     }
 
                     @Override
@@ -81,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
                     @Override
                     public Boolean doInBackground() throws Throwable {
-                        return mTFCard.mockC2SNegotiateKey(cts_pcAddr, cts_pcAppName, cts_pcConName, pcSoreId, c2SNegotiateInfo);
+                        return mQTF.mockC2SNegotiateKey(cts_pcAddr, cts_pcAppName, cts_pcConName, pcSoreId, c2SNegotiateInfo);
                     }
 
                     @Override
@@ -99,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
                     @Override
                     public Boolean doInBackground() throws Throwable {
-                        return mTFCard.getKeyHandleByC2S(cts_pcAppName, cts_pcConName, cts_pcUserPin, c2SNegotiateInfo.getCheckCode(), c2SNegotiateInfo.getFlag());
+                        return mQTF.getKeyHandleByC2S(cts_pcAppName, cts_pcConName, cts_pcUserPin, c2SNegotiateInfo.getCheckCode(), c2SNegotiateInfo.getFlag());
                     }
 
                     @Override
@@ -117,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public String doInBackground() throws Throwable {
                         String otherStoreId = ((EditText) findViewById(R.id.et_otherStoreId)).getText().toString();
-                        return mTFCard.getAuthSynFlag(otherStoreId, ctc_pcAppName, ctc_pcConName, ctc_pcUserPin);
+                        return mQTF.getAuthSynFlag(otherStoreId, ctc_pcAppName, ctc_pcConName, ctc_pcUserPin);
                     }
 
                     @Override
@@ -137,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                     public Boolean doInBackground() throws Throwable {
                         String otherStoreId = ((EditText) findViewById(R.id.et_otherStoreId)).getText().toString();
                         String authSynFlag = ((EditText) findViewById(R.id.et_authSynFlag)).getText().toString();
-                        return mTFCard.authSynFlag(otherStoreId, ctc_pcAppName, ctc_pcConName, ctc_pcUserPin, authSynFlag);
+                        return mQTF.authSynFlag(otherStoreId, ctc_pcAppName, ctc_pcConName, ctc_pcUserPin, authSynFlag);
                     }
 
                     @Override
@@ -156,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                     public Boolean doInBackground() throws Throwable {
                         String otherStoreId = ((EditText) findViewById(R.id.et_otherStoreId)).getText().toString();
                         String authSynFlag = ((EditText) findViewById(R.id.et_authSynFlag)).getText().toString();
-                        return mTFCard.getKeyHandleByC2C(otherStoreId, authSynFlag, ctc_pcAppName, ctc_pcConName, ctc_pcUserPin);
+                        return mQTF.getKeyHandleByC2C(otherStoreId, authSynFlag, ctc_pcAppName, ctc_pcConName, ctc_pcUserPin);
                     }
 
                     @Override
@@ -181,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
 
                         String paddedHexString = ConvertUtils.bytes2HexString(paddedBytes);
                         LogUtils.d("硬加密明文：" + paddedHexString + "（已填充）");
-                        return mTFCard.hardEncrypt(paddedBytes);
+                        return mQTF.hardEncrypt(paddedBytes);
                     }
 
                     @Override
@@ -201,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                     public byte[] doInBackground() throws Throwable {
                         LogUtils.d("硬解密密文：" + mCipherHexString);
                         byte[] cipherBytes = ConvertUtils.hexString2Bytes(mCipherHexString);
-                        return mTFCard.hardDecrypt(cipherBytes);
+                        return mQTF.hardDecrypt(cipherBytes);
                     }
 
                     @Override
@@ -227,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
                     @Override
                     public String doInBackground() throws Throwable {
-                        softKey = mTFCard.getSoftKey();
+                        softKey = mQTF.getSoftKey();
                         return ConvertUtils.bytes2HexString(softKey);
                     }
 
@@ -253,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
 
                         String paddedHexString = ConvertUtils.bytes2HexString(paddedBytes);
                         LogUtils.d("软加密明文：" + paddedHexString + "（已填充）");
-                        return mTFCard.sm4SoftEncrypt(paddedBytes, softKey);
+                        return mQTF.sm4SoftEncrypt(paddedBytes, softKey);
                     }
 
                     @Override
@@ -273,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                     public byte[] doInBackground() throws Throwable {
                         LogUtils.d("软解密密文：" + mCipherHexString);
                         byte[] cipherBytes = ConvertUtils.hexString2Bytes(mCipherHexString);
-                        return mTFCard.sm4SoftDecrypt(cipherBytes, softKey);
+                        return mQTF.sm4SoftDecrypt(cipherBytes, softKey);
                     }
 
                     @Override
@@ -301,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<int[]>() {
                     @Override
                     public int[] doInBackground() throws Throwable {
-                        return mTFCard.queryKeyLength(cts_pcAppName, cts_pcConName, pcSoreId);
+                        return mQTF.queryKeyLength(cts_pcAppName, cts_pcConName, pcSoreId);
                     }
 
                     @Override
@@ -324,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
                     @Override
                     public Boolean doInBackground() throws Throwable {
-                        return mTFCard.onlineChargingKey(cts_pcAddr, cts_pcAppName, cts_pcConName, cts_pcUserPin);
+                        return mQTF.onlineChargingKey(cts_pcAddr, cts_pcAppName, cts_pcConName, cts_pcUserPin);
                     }
 
                     @Override
@@ -341,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Void>() {
                     @Override
                     public Void doInBackground() throws Throwable {
-                        mTFCard.destroyRes();
+                        mQTF.destroyRes();
                         return null;
                     }
 

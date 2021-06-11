@@ -1,16 +1,20 @@
 package com.qasky.tfcard;
 
-public class TFCard {
+public class QTF {
     static {
-        System.loadLibrary("TFCard");
+        System.loadLibrary("QTF");
     }
 
     /**
-     * 资源初始化，获取pcStoreId
+     * 资源初始化
      * @param pkgName 应用包名
-     * @return pcStoreId
      */
-    public native String getStoreId(String pkgName);
+    public native boolean initRes(String pkgName);
+
+    /**
+     * 导出设备序列号
+     */
+    public native String exportStoreId();
 
     /**
      * 查询密钥长度（字节Byte）
