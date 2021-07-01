@@ -1,12 +1,14 @@
 package com.qasky.tfcard;
 
 public class QTF {
+
     static {
         System.loadLibrary("QTF");
     }
 
     /**
      * 资源初始化
+     *
      * @param pkgName 应用包名
      */
     public native boolean initRes(String pkgName);
@@ -62,27 +64,31 @@ public class QTF {
 
     /**
      * C2C获取认证同步码
-     * @param pcOtherStoreId    对端设备序列号
-     * @param pcAppName         应用名称
-     * @param pcContainerName   容器名称
-     * @param pcUserPin         容器名称
-     * @return  认证同步码
+     *
+     * @param pcOtherStoreId  对端设备序列号
+     * @param pcAppName       应用名称
+     * @param pcContainerName 容器名称
+     * @param pcUserPin       容器名称
+     * @return 认证同步码
      */
     public native String getAuthSynFlag(String pcOtherStoreId, String pcAppName, String pcContainerName, String pcUserPin);
 
     /**
      * C2C同步认证
-     * @param pcOtherStoreId    对端设备序列号
-     * @param pcAppName         应用名称
-     * @param pcContainerName   容器名称
-     * @param pcPin             容器名称
-     * @param pcFlag            对端认证同步码
+     *
+     * @param pcOtherStoreId  对端设备序列号
+     * @param pcAppName       应用名称
+     * @param pcContainerName 容器名称
+     * @param pcPin           容器名称
+     * @param pcFlag          对端认证同步码
      * @return 是否认证成功
      */
     public native boolean authSynFlag(String pcOtherStoreId, String pcAppName, String pcContainerName, String pcPin, String pcFlag);
 
     /**
      * C2C获取密钥句柄
+     *
+     * @param pcFlag 对端认证同步码
      */
     public native boolean getKeyHandleByC2C(String pcOtherStoreId, String pcFlag, String pcAppName, String pcContainerName, String pcPin);
 
@@ -102,14 +108,36 @@ public class QTF {
     public native byte[] getSoftKey();
 
     /**
-     * SM4软算法加密
+     * SM4加密
      */
     public native byte[] sm4SoftEncrypt(byte[] data, byte[] key);
 
     /**
-     * SM4软算法解密
+     * SM4解密
      */
     public native byte[] sm4SoftDecrypt(byte[] data, byte[] key);
+
+    /**
+     * 导出证书
+     *
+     * @param pcAppName       应用名
+     * @param pcContainerName 容器名
+     * @param certType        证书类型（0：加密证书 1：签名证书 2：根证书）
+     * @return 证书
+     */
+    public native byte[] exportCert(String pcAppName, String pcContainerName, int certType);
+
+    /**
+     * RSA签名摘要
+     */
+    public native byte[] RSASignDigest(String pcAppName, String pcContainerName, String pcPin, byte[] digest);
+
+
+    /**
+     * ECC签名摘要
+     */
+    public native byte[] ECCSignDigest(String pcAppName, String pcContainerName, String pcPin, byte[] digest);
+
 
     /**
      * 销毁资源

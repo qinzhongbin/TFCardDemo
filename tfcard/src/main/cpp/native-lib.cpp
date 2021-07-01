@@ -490,6 +490,34 @@ Java_com_qasky_tfcard_QTF_sm4SoftDecrypt(JNIEnv *env, jobject thiz, jbyteArray d
 }
 
 extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_com_qasky_tfcard_QTF_exportCert(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name, jint cert_type) {
+    int ret = 0;
+
+    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
+    char *pcContainerName = const_cast<char *>(env->GetStringUTFChars(pc_container_name, JNI_FALSE));
+
+    unsigned char *pucCert = nullptr;
+    unsigned long ulCertLen = 4096;
+    unsigned long ulTimeOut = 0;
+    pucCert = (unsigned char *) malloc(ulCertLen);
+    memset(pucCert, 0, ulCertLen);
+
+    ret = QCard_ExportCertificate(phStoreHandles[0], pcAppName, pcContainerName, cert_type, pucCert, &ulCertLen, &ulTimeOut);
+
+    if (ret) {
+        LOGE("QCard_ExportCertificate ERROR: %x", ret);
+    }
+
+    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
+    env->ReleaseStringUTFChars(pc_container_name, pcContainerName);
+
+    jbyteArray j_cert = env->NewByteArray(ulCertLen);
+    env->SetByteArrayRegion(j_cert, 0, ulCertLen, reinterpret_cast<const jbyte *>(pucCert));
+    return j_cert;
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_qasky_tfcard_QTF_destroyRes(JNIEnv *env, jobject thiz) {
     int ret = 0;
@@ -514,4 +542,81 @@ Java_com_qasky_tfcard_QTF_destroyRes(JNIEnv *env, jobject thiz) {
     phStoreHandles = nullptr;
     hKeyHandle = nullptr;
     KeyParam.PaddingType = 0;
+}
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_com_qasky_tfcard_QTF_RSASignDigest(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name, jstring pc_pin, jbyteArray digest) {
+    int ret = 0;
+
+    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
+    char *pcContainerName = const_cast<char *>(env->GetStringUTFChars(pc_container_name, JNI_FALSE));
+    char *pcPin = const_cast<char *>(env->GetStringUTFChars(pc_pin, JNI_FALSE));
+
+    unsigned char *pucSignature = nullptr;
+    unsigned long ulUserPinRetry = 0, ulSignatureLen = 0;
+    unsigned long len_digest = env->GetArrayLength(digest);
+    jbyte *j_digest = env->GetByteArrayElements(digest, JNI_FALSE);
+    unsigned char *pucDigest = reinterpret_cast<unsigned char *>(j_digest);
+
+    ret = QCard_RSASignData(phStoreHandles[0], pcAppName, pcContainerName, pcPin, &ulUserPinRetry, pucDigest, len_digest, pucSignature, &ulSignatureLen);
+    if (ret) {
+        LOGE("QCard_RSASignData ERROR: %x", ret);
+    }
+
+    LOGD("ulSignatureLen = %lu", ulSignatureLen);
+    pucSignature = (unsigned char *)malloc(ulSignatureLen);
+    memset(pucSignature, 0, ulSignatureLen);
+
+    ret = QCard_RSASignData(phStoreHandles[0], pcAppName, pcContainerName, pcPin, &ulUserPinRetry, pucDigest, len_digest, pucSignature, &ulSignatureLen);
+    if (ret) {
+        LOGE("QCard_RSASignData ERROR: %x", ret);
+    }
+
+    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
+    env->ReleaseStringUTFChars(pc_container_name, pcContainerName);
+    env->ReleaseStringUTFChars(pc_pin, pcPin);
+
+
+    jbyteArray j_signature = env->NewByteArray(ulSignatureLen);
+    env->SetByteArrayRegion(j_signature, 0, ulSignatureLen, reinterpret_cast<const jbyte *>(pucSignature));
+    return j_signature;
+}
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_com_qasky_tfcard_QTF_ECCSignDigest(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name, jstring pc_pin, jbyteArray digest) {
+    int ret = 0;
+
+    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
+    char *pcContainerName = const_cast<char *>(env->GetStringUTFChars(pc_container_name, JNI_FALSE));
+    char *pcPin = const_cast<char *>(env->GetStringUTFChars(pc_pin, JNI_FALSE));
+
+    char *pcSignature = nullptr;
+    unsigned long ulUserPinRetry = 0, ulSignatureLen = 0;
+    unsigned long len_digest = env->GetArrayLength(digest);
+    jbyte *j_digest = env->GetByteArrayElements(digest, JNI_FALSE);
+    unsigned char *pucDigest = reinterpret_cast<unsigned char *>(j_digest);
+
+    ret = QCard_SM2SignSM3Data(phStoreHandles[0], pcAppName, pcContainerName, pucDigest, len_digest, pcPin, &ulUserPinRetry, pcSignature, &ulSignatureLen);
+    if (ret) {
+        LOGE("QCard_SM2SignSM3Data : %x", ret);
+    }
+
+    LOGD("ulSignatureLen = %lu", ulSignatureLen);
+    pcSignature = (char *)malloc(ulSignatureLen);
+    memset(pcSignature, 0, ulSignatureLen);
+
+    ret = QCard_SM2SignSM3Data(phStoreHandles[0], pcAppName, pcContainerName, pucDigest, len_digest, pcPin, &ulUserPinRetry, pcSignature, &ulSignatureLen);
+    if (ret) {
+        LOGE("QCard_SM2SignSM3Data ERROR: %x", ret);
+    }
+
+    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
+    env->ReleaseStringUTFChars(pc_container_name, pcContainerName);
+    env->ReleaseStringUTFChars(pc_pin, pcPin);
+
+    jbyteArray j_signature = env->NewByteArray(ulSignatureLen);
+    env->SetByteArrayRegion(j_signature, 0, ulSignatureLen, reinterpret_cast<const jbyte *>(pcSignature));
+    return j_signature;
 }

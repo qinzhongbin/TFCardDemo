@@ -2,26 +2,25 @@ plugins {
     id 'com.android.library'
 }
 
+def cmd_gitCommitCount = 'git rev-list HEAD --first-parent --count'
+def cmd_gitVersionTag = 'git describe --tags --dirty'
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
+    ndkVersion '22.1.7171670'
 
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        versionCode cmd_gitCommitCount.execute().text.toInteger()
+        versionName cmd_gitVersionTag.execute().text
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        consumerProguardFiles "consumer-rules.pro" // 保留AAR混淆配置
 
         externalNativeBuild {
             cmake {
-                cFlags ""
-                abiFilters /*'armeabi-v7a',*/ 'arm64-v8a'
-            }
-            ndk {
-                abiFilters /*'armeabi-v7a',*/ 'arm64-v8a'
+                abiFilters /*'armeabi-v7a',*/ 'arm64-v8a' // ABIs编译配置
             }
         }
     }
@@ -29,30 +28,13 @@ android {
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
-            version "3.10.2"
-        }
-    }
-
-    signingConfigs {
-        debug {
-            storeFile file('C:\\Users\\Administrator\\.android\\debug.keystore')
-            storePassword 'android'
-            keyPassword 'android'
-            keyAlias 'androiddebugkey'
-        }
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            signingConfig signingConfigs.debug
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            version "3.18.1"
         }
     }
 
     libraryVariants.all {
         outputs.forEach {
-            it.outputFileName = "Qasky_TF_Card.aar"
+            it.outputFileName = "QTF_" + cmd_gitVersionTag.execute().text.trim() + ".aar"
         }
     }
 
@@ -66,12 +48,4 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-}
-
-dependencies {
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.2.1'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }

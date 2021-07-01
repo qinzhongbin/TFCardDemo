@@ -16,6 +16,8 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.qasky.tfcard.C2SNegotiateInfo;
 import com.qasky.tfcard.QTF;
 
+import kotlin.UByteArray;
+
 public class MainActivity extends AppCompatActivity {
     QTF mQTF = new QTF();
 
@@ -347,6 +349,85 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Boolean result) {
                         ToastUtils.showShort("密钥充注" + (result ? "成功\n密钥长度不少于2048" : "失败"));
+                    }
+                });
+            }
+        });
+
+
+        findViewById(R.id.exportEncCert).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+                    @Override
+                    public String doInBackground() throws Throwable {
+                        byte[] encCert = mQTF.exportCert(ctc_pcAppName, ctc_pcConName, 0);
+                        return ConvertUtils.bytes2HexString(encCert);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        LogUtils.d("加密证书：\n" + result);
+                        ToastUtils.showShort("成功");
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.exportSignCert).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+                    @Override
+                    public String doInBackground() throws Throwable {
+                        byte[] encCert = mQTF.exportCert(ctc_pcAppName, ctc_pcConName, 1);
+                        return ConvertUtils.bytes2HexString(encCert);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        LogUtils.d("签名证书：\n" + result);
+                        ToastUtils.showShort("成功");
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.rsaSignDigest).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+                    @Override
+                    public String doInBackground() throws Throwable {
+                        byte[] digest = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20};
+                        byte[] encCert = mQTF.RSASignDigest(ctc_pcAppName, ctc_pcConName, ctc_pcUserPin, digest);
+                        return ConvertUtils.bytes2HexString(encCert);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        LogUtils.d("RSA签名：\n" + result);
+                        ToastUtils.showShort("成功");
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.eccSignDigest).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+                    @Override
+                    public String doInBackground() throws Throwable {
+                        byte[] digest = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20};
+                        byte[] encCert = mQTF.ECCSignDigest(ctc_pcAppName, ctc_pcConName, ctc_pcUserPin, digest);
+                        return ConvertUtils.bytes2HexString(encCert);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        LogUtils.d("ECC签名：\n" + result);
+                        ToastUtils.showShort("成功");
                     }
                 });
             }

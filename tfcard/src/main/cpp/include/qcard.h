@@ -167,7 +167,7 @@ QCARD_API void QCard_SetLogExport(void(*cb)(QCard_LogLevel level, char *msg));
 * Input          : hStoreHandle    : 安全存储区句柄
 *                : pcAppName       : 应用名称
 *                : pcContainerName : 容器名称
-*                : ulCertType      : 数字证书类型 0:加密证书 1:签名证书 2加密证书
+*                : ulCertType      : 数字证书类型 0:加密证书 1:签名证书 2根证书
 *                : pcCert          : 数字证书缓存，当为0时获取数字证书长度
 *                : pulCertLen       :数字证书缓存长度
 * OutPut         : pcCert          : 数字证书
@@ -179,6 +179,44 @@ QCARD_API int QCard_ExportCertificate(QHANDLE hStoreHandle, char *pcAppName, cha
                                       unsigned long ulCertType,
                                       unsigned char *pucCert, unsigned long *pulCertLen,
                                       unsigned long *pulTimeOut);
+
+/*******************************************************************************
+* Function Name  : QCard_ExportPublicKey
+* Description    : 导出公钥
+*                : hStoreHandle             : 安全存储区句柄
+*                : pcAppName                : 应用名称
+*                : pcContainerName          : 容器名称
+*                : ulPublicKeyType          : 公钥类型 0:加密公钥 1:签名公钥
+*                : pcPublicCert             : 公钥指针，为0时获取公钥长度
+*                : pulPublicCertLen         : 公钥长度
+* Return         : 成功返回0,其它返回错误码
+*******************************************************************************/
+QCARD_API int QCard_ExportPublicKey(QHANDLE hStoreHandle, char *pcAppName, char *pcContainerName,
+                                      unsigned long ulPublicKeyType,
+                                      unsigned char *pcPublicCert,
+                                      unsigned long *pulPublicCertLen);
+
+/*******************************************************************************
+* Function Name  : QCard_SM3DigestData
+* Description    : SM3摘要数据
+*                : hStoreHandle     : 安全存储区句柄
+*                : pcAppName        : 应用名称
+*                : pcContainerName  : 容器名称
+*                : pcData           : 待摘要数据
+*                : ulDataLen        : 待签名数据长度
+*                : pcUserPin        : 用户Pin
+*                : ulUserPinRetry   : 应用用户PIN出错后返回的重试次数
+*                : digestdata       : 摘要结果指针，值为0时获取摘要结果长度
+*                : digestdataLen    : 摘要结果长度
+* Return         : 成功返回0,其它返回错误码
+*******************************************************************************/
+QCARD_API int QCard_SM3DigestData(QHANDLE hStoreHandle, char *pcAppName, char *pcContainerName,
+                                    unsigned char *pcData,
+                                    unsigned long ulDataLen,
+                                    char *pcUserPin,
+                                    unsigned long *ulUserPinRetry,
+                                    char **digestdata,
+                                    unsigned long *digestdataLen);
 
 /*******************************************************************************
 * Function Name  : QCard_RSASignData
