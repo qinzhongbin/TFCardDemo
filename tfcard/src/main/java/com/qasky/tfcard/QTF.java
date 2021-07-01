@@ -120,24 +120,31 @@ public class QTF {
     /**
      * 导出证书
      *
-     * @param pcAppName       应用名
-     * @param pcContainerName 容器名
-     * @param certType        证书类型（0：加密证书 1：签名证书 2：根证书）
-     * @return 证书
+     * @param certType 证书类型 0->加密证书 1->签名证书 2->根证书
      */
     public native byte[] exportCert(String pcAppName, String pcContainerName, int certType);
+
+    /**
+     * 导出公钥
+     *
+     * @param keyType 公钥类型 0->加密公钥 1->签名公钥
+     */
+    public native byte[] exportPubKey(String pcAppName, String pcContainerName, int keyType);
+
+    /**
+     * SM3计算摘要
+     */
+    public native byte[] sm3Digest(String pcAppName, String pcContainerName, String pcPin, byte[] data);
 
     /**
      * RSA签名摘要
      */
     public native byte[] RSASignDigest(String pcAppName, String pcContainerName, String pcPin, byte[] digest);
 
-
     /**
      * ECC签名摘要
      */
     public native byte[] ECCSignDigest(String pcAppName, String pcContainerName, String pcPin, byte[] digest);
-
 
     /**
      * 销毁资源

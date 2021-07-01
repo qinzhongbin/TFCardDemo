@@ -9,12 +9,20 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import com.blankj.utilcode.util.ConvertUtils;
+import com.blankj.utilcode.util.EncryptUtils;
+import com.blankj.utilcode.util.FileIOUtils;
+import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.SDCardUtils;
 import com.blankj.utilcode.util.ThreadUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.qasky.tfcard.C2SNegotiateInfo;
 import com.qasky.tfcard.QTF;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import kotlin.UByteArray;
 
@@ -354,7 +362,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         findViewById(R.id.exportEncCert).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -387,6 +394,65 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(String result) {
                         LogUtils.d("签名证书：\n" + result);
+                        ToastUtils.showShort("成功");
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.exportEncPubKey).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+                    @Override
+                    public String doInBackground() throws Throwable {
+                        byte[] encCert = mQTF.exportPubKey(ctc_pcAppName, ctc_pcConName, 0);
+                        return ConvertUtils.bytes2HexString(encCert);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        LogUtils.d("加密公钥：\n" + result);
+                        ToastUtils.showShort("成功");
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.exportSignPubKey).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+                    @Override
+                    public String doInBackground() throws Throwable {
+                        byte[] encCert = mQTF.exportPubKey(ctc_pcAppName, ctc_pcConName, 1);
+                        return ConvertUtils.bytes2HexString(encCert);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        LogUtils.d("签名公钥：\n" + result);
+                        ToastUtils.showShort("成功");
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.sm3Digest).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+                    @Override
+                    public String doInBackground() throws Throwable {
+                        InputStream inputStream = getResources().getAssets().open("量子安全移动存储介质密钥协商充注协议详细设计.docx");
+                        byte[] bytes = ConvertUtils.inputStream2Bytes(inputStream);
+                        byte[] digest = mQTF.sm3Digest(ctc_pcAppName, ctc_pcConName, ctc_pcUserPin, bytes);
+                        return ConvertUtils.bytes2HexString(digest);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        LogUtils.d("SM3计算摘要：\n" + result);
                         ToastUtils.showShort("成功");
                     }
                 });
