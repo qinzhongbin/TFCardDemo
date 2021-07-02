@@ -5,6 +5,9 @@ public class QTF {
         System.loadLibrary("QTF");
     }
 
+    public native int testCurl();
+
+
     /**
      * 资源初始化
      * @param pkgName 应用包名

@@ -10,7 +10,7 @@
 
 typedef unsigned char	u8;
 typedef unsigned short	u16;
-typedef unsigned long   u32; // 跨平台编译需要注意
+typedef unsigned int  u32; // 跨平台编译需要注意
 
 #ifndef NO_PADDING
 #define NO_PADDING				0

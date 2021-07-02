@@ -28,6 +28,12 @@
             android:padding="10dp">
 
             <Button
+                android:id="@+id/testCurl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="QAQ" />
+
+            <Button
                 android:id="@+id/initRes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
