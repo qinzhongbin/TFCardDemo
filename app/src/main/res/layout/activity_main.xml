@@ -27,11 +27,23 @@
             android:orientation="vertical"
             android:padding="10dp">
 
-            <Button
-                android:id="@+id/initRes"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="初始化资源" />
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/initRes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="初始化资源" />
+
+                <Button
+                    android:id="@+id/destroyRes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="销毁资源" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/exportStoreId"
@@ -223,10 +235,10 @@
             </LinearLayout>
 
             <Button
-                android:id="@+id/destroyRes"
+                android:id="@+id/verifyPin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="销毁资源" />
+                android:text="验证PIN" />
         </LinearLayout>
 
         <EditText

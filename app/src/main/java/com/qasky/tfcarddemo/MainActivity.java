@@ -84,6 +84,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.destroyRes).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Void>() {
+                    @Override
+                    public Void doInBackground() throws Throwable {
+                        mQTF.destroyRes();
+                        return null;
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        ToastUtils.showShort("销毁资源成功");
+                    }
+                });
+            }
+        });
+
         findViewById(R.id.exportStoreId).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -499,19 +517,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.destroyRes).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.verifyPin).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Void>() {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
                     @Override
-                    public Void doInBackground() throws Throwable {
-                        mQTF.destroyRes();
-                        return null;
+                    public Boolean doInBackground() throws Throwable {
+                        return mQTF.verifyAppPIN(ctc_pcAppName, ctc_pcUserPin, 0);
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
-                        ToastUtils.showShort("销毁资源成功");
+                    public void onSuccess(Boolean result) {
+                        ToastUtils.showShort(result ? "成功" : "失败");
                     }
                 });
             }

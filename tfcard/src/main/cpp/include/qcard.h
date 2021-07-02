@@ -22,14 +22,6 @@
 extern "C" {
 #endif
 
-/**
- * Android平台枚举安全存储区句柄
- * @param phStoreHandles
- * @param pcPackageName
- * @return  成功返回安全存储区个数, 其它返回错误值
- */
-QCARD_API int QCard_Android_EnumStoreHandle(QHANDLES *phStoreHandles, char *pcPackageName);
-
 /*******************************************************************************
 * Function Name  : QCard_EnumStoreHandle
 * Description    : 枚举安全存储区句柄

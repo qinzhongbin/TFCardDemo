@@ -66,6 +66,33 @@ Java_com_qasky_tfcard_QTF_initRes(JNIEnv *env, jobject thiz, jstring pkg_name) {
 }
 
 extern "C"
+JNIEXPORT void JNICALL
+Java_com_qasky_tfcard_QTF_destroyRes(JNIEnv *env, jobject thiz) {
+    int ret = 0;
+
+    if (phStoreHandles != nullptr && phStoreHandles[0]) {
+        if (hKeyHandle != nullptr) {
+            QCard_KeyFinal(phStoreHandles[0], hKeyHandle);
+        }
+
+        ret = QCard_UpdateResource(phStoreHandles[0]); // 更新资源
+        if (ret) {
+            LOGE("更新资源失败 ===> %x", ret);
+        }
+        QCard_DestoryResource(phStoreHandles[0]); // 销毁资源
+        ret = QCard_Logout(phStoreHandles[0]);
+        if (ret) {
+            LOGE("退出登录失败 ===> %x", ret);
+        }
+        QCard_FreeStoreHandle(phStoreHandles); // 关闭枚举句柄
+    }
+
+    phStoreHandles = nullptr;
+    hKeyHandle = nullptr;
+    KeyParam.PaddingType = 0;
+}
+
+extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_qasky_tfcard_QTF_exportStoreId(JNIEnv *env, jobject thiz) {
     char pcStoreId[32] = {0};
@@ -94,19 +121,22 @@ Java_com_qasky_tfcard_QTF_queryKeyLength(JNIEnv *env, jobject thiz, jstring pc_a
     char *storeId = const_cast<char *>(env->GetStringUTFChars(store_id, JNI_FALSE));
     unsigned long uiKeyTotalLen = 0, uiKeyUsedLen = 0;
     ret = QCard_QueryKey(phStoreHandles[0], storeId, pcAppName, pcConName, &uiKeyTotalLen, &uiKeyUsedLen);
-    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
-    env->ReleaseStringUTFChars(pc_container_name, pcConName);
-    env->ReleaseStringUTFChars(store_id, storeId);
 
     if (ret) {
         LOGE("查询密钥错误 ===> %x", ret);
         return nullptr;
     }
 
+    LOGD("uiKeyTotalLen = %lu", uiKeyTotalLen);
+    LOGD("uiKeyUsedLen = %lu", uiKeyUsedLen);
+
     unsigned long c_arr[] = {uiKeyTotalLen, uiKeyUsedLen, uiKeyTotalLen - uiKeyUsedLen};
     jintArray j_arr = env->NewIntArray(3);
     env->SetIntArrayRegion(j_arr, 0, 3, reinterpret_cast<const jint *>(c_arr));
 
+    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
+    env->ReleaseStringUTFChars(pc_container_name, pcConName);
+    env->ReleaseStringUTFChars(store_id, storeId);
     return j_arr;
 }
 
@@ -672,29 +702,18 @@ Java_com_qasky_tfcard_QTF_ECCSignDigest(JNIEnv *env, jobject thiz, jstring pc_ap
 }
 
 extern "C"
-JNIEXPORT void JNICALL
-Java_com_qasky_tfcard_QTF_destroyRes(JNIEnv *env, jobject thiz) {
+JNIEXPORT jboolean JNICALL
+Java_com_qasky_tfcard_QTF_verifyAppPIN(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_user_pin, jint retries_remaining) {
     int ret = 0;
+    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
+    char *pcPin = const_cast<char *>(env->GetStringUTFChars(pc_user_pin, JNI_FALSE));
+    unsigned long retriesRemaining = retries_remaining;
 
-    if (phStoreHandles != nullptr && phStoreHandles[0]) {
-        if (hKeyHandle != nullptr) {
-            QCard_KeyFinal(phStoreHandles[0], hKeyHandle);
-        }
-
-        ret = QCard_UpdateResource(phStoreHandles[0]); // 更新资源
-        if (ret) {
-            LOGE("更新资源失败 ===> %x", ret);
-        }
-        QCard_DestoryResource(phStoreHandles[0]); // 销毁资源
-        ret = QCard_Logout(phStoreHandles[0]);
-        if (ret) {
-            LOGE("退出登录失败 ===> %x", ret);
-        }
-        QCard_FreeStoreHandle(phStoreHandles); // 关闭枚举句柄
+    ret = QCard_VerifyAppPIN(phStoreHandles[0], pcAppName, pcPin, &retriesRemaining);
+    if (ret) {
+        LOGE("QCard_VerifyAppPIN ERROR: %x", ret);
     }
 
-    phStoreHandles = nullptr;
-    hKeyHandle = nullptr;
-    KeyParam.PaddingType = 0;
+    LOGD("验证PIN剩余次数：%lu", retriesRemaining);
+    return !ret;
 }
-

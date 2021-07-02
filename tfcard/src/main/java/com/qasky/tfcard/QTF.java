@@ -14,6 +14,11 @@ public class QTF {
     public native boolean initRes(String pkgName);
 
     /**
+     * 销毁资源
+     */
+    public native void destroyRes();
+
+    /**
      * 导出设备序列号
      */
     public native String exportStoreId();
@@ -147,7 +152,9 @@ public class QTF {
     public native byte[] ECCSignDigest(String pcAppName, String pcContainerName, String pcPin, byte[] digest);
 
     /**
-     * 销毁资源
+     * 验证PIN
+     * @param retriesRemaining 剩余重试次数
+     * @return PIN是否正确
      */
-    public native void destroyRes();
+    public native boolean verifyAppPIN(String pcAppName, String pcUserPin, int retriesRemaining);
 }
