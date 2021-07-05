@@ -10,7 +10,6 @@ import android.widget.EditText;
 
 import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.LogUtils;
-import com.blankj.utilcode.util.NetworkUtils;
 import com.blankj.utilcode.util.SDCardUtils;
 import com.blankj.utilcode.util.ThreadUtils;
 import com.blankj.utilcode.util.ToastUtils;
@@ -21,8 +20,8 @@ public class MainActivity extends AppCompatActivity {
     QTF mQTF = new QTF();
 
 //    armeabi-v7a不兼容HTTPS，使用18890端口
-    String cts_pcAddr = "112.27.97.202:8890";
-//    String cts_pcAddr = "112.27.97.202:18890";
+//    String cts_pcAddr = "112.27.97.202:8890";
+    String cts_pcAddr = "112.27.97.202:18890";
 
     String cts_pcAppName = "SCBCTS";
     String cts_pcConName = "SCBCTS";
@@ -47,12 +46,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        ToastUtils.showShort(NetworkUtils.isConnected()?"网络可用":"网络不可用");
-
-        boolean availableByPing = NetworkUtils.isAvailableByPing("112.27.97.202");
-        LogUtils.d(availableByPing);
-
-
         ((SwitchCompat) findViewById(R.id.modeSwitch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -65,24 +58,6 @@ public class MainActivity extends AppCompatActivity {
                     findViewById(R.id.container_c2s).setVisibility(View.VISIBLE);
                     findViewById(R.id.container_c2c).setVisibility(View.GONE);
                 }
-            }
-        });
-
-
-        findViewById(R.id.testCurl).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Integer>() {
-                    @Override
-                    public Integer doInBackground() throws Throwable {
-                        return mQTF.testCurl();
-                    }
-
-                    @Override
-                    public void onSuccess(Integer result) {
-
-                    }
-                });
             }
         });
 
