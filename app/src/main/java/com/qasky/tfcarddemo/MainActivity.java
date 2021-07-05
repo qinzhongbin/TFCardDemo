@@ -249,6 +249,13 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public String doInBackground() throws Throwable {
                         softKey = mQTF.getSoftKey();
+
+                        StringBuilder key = new StringBuilder();
+                        for (byte b : softKey) {
+                            key.append(String.format("%02X", b));
+                        }
+                        LogUtils.d(key.toString());
+
                         return ConvertUtils.bytes2HexString(softKey);
                     }
 
