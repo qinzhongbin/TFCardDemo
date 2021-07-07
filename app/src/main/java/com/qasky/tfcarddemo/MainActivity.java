@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
     QTF mQTF = new QTF();
 
     String cts_pcAddr = "112.27.97.202:8890";
-    String cts_pcAppName = "SCBCTS";
-    String cts_pcConName = "SCBCTS";
+    String cts_pcAppName = "hzbyte";
+    String cts_pcConName = "hzbyte";
     String cts_pcUserPin = "12222222";
     String ctc_pcAppName = "SCBCTC";
     String ctc_pcConName = "SCBCTC";
@@ -383,19 +383,23 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.exportEncCert).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
-                    @Override
-                    public String doInBackground() throws Throwable {
-                        byte[] encCert = mQTF.exportCert(ctc_pcAppName, ctc_pcConName, 0);
-                        return ConvertUtils.bytes2HexString(encCert);
-                    }
+//                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+//                    @Override
+//                    public String doInBackground() throws Throwable {
+//                        byte[] encCert = mQTF.exportCert(cts_pcAppName, cts_pcConName, 0);
+//                        return ConvertUtils.bytes2HexString(encCert);
+//                    }
+//
+//                    @Override
+//                    public void onSuccess(String result) {
+//                        LogUtils.d("加密证书：\n" + result);
+//                        ToastUtils.showShort("成功");
+//                    }
+//                });
 
-                    @Override
-                    public void onSuccess(String result) {
-                        LogUtils.d("加密证书：\n" + result);
-                        ToastUtils.showShort("成功");
-                    }
-                });
+                byte[] encCert = mQTF.exportCert(cts_pcAppName, cts_pcConName, 0);
+               LogUtils.d(ConvertUtils.bytes2HexString(encCert));
+
             }
         });
 
@@ -405,7 +409,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
                     @Override
                     public String doInBackground() throws Throwable {
-                        byte[] encCert = mQTF.exportCert(ctc_pcAppName, ctc_pcConName, 1);
+                        byte[] encCert = mQTF.exportCert(cts_pcAppName, cts_pcConName, 1);
                         return ConvertUtils.bytes2HexString(encCert);
                     }
 
@@ -424,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
                     @Override
                     public String doInBackground() throws Throwable {
-                        byte[] encCert = mQTF.exportPubKey(ctc_pcAppName, ctc_pcConName, 0);
+                        byte[] encCert = mQTF.exportPubKey(cts_pcAppName, cts_pcConName, 0);
                         return ConvertUtils.bytes2HexString(encCert);
                     }
 
@@ -443,7 +447,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
                     @Override
                     public String doInBackground() throws Throwable {
-                        byte[] encCert = mQTF.exportPubKey(ctc_pcAppName, ctc_pcConName, 1);
+                        byte[] encCert = mQTF.exportPubKey(cts_pcAppName, cts_pcConName, 1);
                         return ConvertUtils.bytes2HexString(encCert);
                     }
 
@@ -464,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
                     public String doInBackground() throws Throwable {
                         InputStream inputStream = getResources().getAssets().open("量子安全移动存储介质密钥协商充注协议详细设计.docx");
                         byte[] bytes = ConvertUtils.inputStream2Bytes(inputStream);
-                        byte[] digest = mQTF.sm3Digest(ctc_pcAppName, ctc_pcConName, ctc_pcUserPin, bytes);
+                        byte[] digest = mQTF.sm3Digest(cts_pcAppName, cts_pcConName, cts_pcUserPin, bytes);
                         return ConvertUtils.bytes2HexString(digest);
                     }
 
@@ -484,7 +488,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public String doInBackground() throws Throwable {
                         byte[] digest = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20};
-                        byte[] encCert = mQTF.RSASignDigest(ctc_pcAppName, ctc_pcConName, ctc_pcUserPin, digest);
+                        byte[] encCert = mQTF.RSASignDigest(cts_pcAppName, cts_pcConName, cts_pcUserPin, digest);
                         return ConvertUtils.bytes2HexString(encCert);
                     }
 
@@ -504,7 +508,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public String doInBackground() throws Throwable {
                         byte[] digest = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20};
-                        byte[] encCert = mQTF.ECCSignDigest(ctc_pcAppName, ctc_pcConName, ctc_pcUserPin, digest);
+                        byte[] encCert = mQTF.ECCSignDigest(cts_pcAppName, cts_pcConName, cts_pcUserPin, digest);
                         return ConvertUtils.bytes2HexString(encCert);
                     }
 
@@ -523,7 +527,7 @@ public class MainActivity extends AppCompatActivity {
                 ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<Boolean>() {
                     @Override
                     public Boolean doInBackground() throws Throwable {
-                        return mQTF.verifyAppPIN(ctc_pcAppName, ctc_pcUserPin, 0);
+                        return mQTF.verifyAppPIN(cts_pcAppName, cts_pcUserPin, 0);
                     }
 
                     @Override

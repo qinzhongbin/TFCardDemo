@@ -529,8 +529,10 @@ Java_com_qasky_tfcard_QTF_exportCert(JNIEnv *env, jobject thiz, jstring pc_app_n
     unsigned char *pucCert = nullptr;
     unsigned long ulCertLen = 0, ulTimeOut = 0;
 
-
+//    LOGE("1");
     ret = QCard_ExportCertificate(phStoreHandles[0], pcAppName, pcContainerName, cert_type, pucCert, &ulCertLen, &ulTimeOut);
+//    LOGE("2");
+
     if (ret) {
         LOGE("QCard_ExportCertificate ERROR: %x", ret);
     }
@@ -651,7 +653,7 @@ Java_com_qasky_tfcard_QTF_RSASignDigest(JNIEnv *env, jobject thiz, jstring pc_ap
         LOGE("QCard_RSASignData ERROR: %x", ret);
     }
 
-    jbyteArray j_signature = env->NewByteArray(ulSignatureLen);
+    jbyteArray  j_signature = env->NewByteArray(ulSignatureLen);
     env->SetByteArrayRegion(j_signature, 0, ulSignatureLen, reinterpret_cast<const jbyte *>(pucSignature));
 
     free(pucSignature);
