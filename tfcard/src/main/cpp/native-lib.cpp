@@ -8,6 +8,9 @@
 #include <qcard.h>
 #include <cstring>
 #include <qalg_sm4.h>
+#include <curl/curl.h>
+#include <iostream>
+#include <skf_type.h>
 
 #define LOG_TAG "Qasky"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -718,4 +721,62 @@ Java_com_qasky_tfcard_QTF_verifyAppPIN(JNIEnv *env, jobject thiz, jstring pc_app
 
     LOGD("验证PIN剩余次数：%lu", retriesRemaining);
     return !ret;
+}
+
+/**
+ * 一旦curl接收到数据，就会调用此回调函数
+ * buffer:数据缓冲区指针
+ * size:调试阶段总是发现为1
+ * nmemb:(memory block)代表此次接受的内存块的长度
+ * userp:用户自定义的一个参数
+ */
+size_t write_data(void* buffer, size_t size, size_t nmemb, void* userp)
+{
+    static int current_index = 0;
+
+    std::cout << "current:" << current_index++;
+    std::cout << (char*)buffer;
+    std::cout << "---------------" << std::endl;
+
+
+    LOGD("buffer = %s", buffer);
+
+
+    int temp = *(int*)userp;    // 这里获取用户自定义参数
+    return nmemb;
+}
+
+
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_qasky_tfcard_QTF_testCurl(JNIEnv *env, jobject thiz) {
+
+    curl_global_init(CURL_GLOBAL_ALL); // 首先全局初始化CURL
+    CURL* curl = curl_easy_init(); // 初始化CURL句柄
+
+    if (NULL == curl)
+    {
+        return 0;
+    }
+
+    int my_param = 1;    // 自定义一个用户参数
+
+    // 设置目标URL
+//    curl_easy_setopt(curl, CURLOPT_URL, "https://112.27.97.202:8890");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.baidu.com");
+    // 设置接收到HTTP服务器的数据时调用的回调函数
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+    // 设置自定义参数(回调函数的第四个参数)
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &my_param);
+    // 执行一次URL请求
+    CURLcode res = curl_easy_perform(curl);
+    // 清理干净
+    curl_easy_cleanup(curl);
+
+    LOGD("res = %d", res);
+
+    return 0;
 }

@@ -1,8 +1,6 @@
 package com.qasky.tfcarddemo;
-
 import android.app.Application;
 import android.view.Gravity;
-
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.blankj.utilcode.util.Utils;

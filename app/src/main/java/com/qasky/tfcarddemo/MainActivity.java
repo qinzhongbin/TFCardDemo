@@ -29,9 +29,12 @@ import kotlin.UByteArray;
 public class MainActivity extends AppCompatActivity {
     QTF mQTF = new QTF();
 
-    String cts_pcAddr = "112.27.97.202:8890";
-    String cts_pcAppName = "hzbyte";
-    String cts_pcConName = "hzbyte";
+//    armeabi-v7a不兼容HTTPS，使用18890端口
+//    String cts_pcAddr = "112.27.97.202:8890";
+    String cts_pcAddr = "112.27.97.202:18890";
+
+    String cts_pcAppName = "SCBCTS";
+    String cts_pcConName = "SCBCTS";
     String cts_pcUserPin = "12222222";
     String ctc_pcAppName = "SCBCTC";
     String ctc_pcConName = "SCBCTC";
@@ -273,6 +276,13 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public String doInBackground() throws Throwable {
                         softKey = mQTF.getSoftKey();
+
+                        StringBuilder key = new StringBuilder();
+                        for (byte b : softKey) {
+                            key.append(String.format("%02X", b));
+                        }
+                        LogUtils.d(key.toString());
+
                         return ConvertUtils.bytes2HexString(softKey);
                     }
 
