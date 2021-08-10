@@ -17,9 +17,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         versionCode cmd_gitCommitCount.execute().text.toInteger()
         versionName cmd_gitVersionTag.execute().text.trim()
-        ndk {
-            abiFilters /*'armeabi-v7a',*/ 'arm64-v8a' // // ABIs编译、打包配置
-        }
     }
 
     buildTypes {
@@ -34,9 +31,18 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    applicationVariants.all {
-        outputs.forEach {
-            it.outputFileName = "TFCardDemo_" + cmd_gitVersionTag.execute().text.trim() + ".apk"
+//    applicationVariants.all {
+//        outputs.forEach {
+//            it.outputFileName = "TFCardDemo_" + cmd_gitVersionTag.execute().text.trim() + ".apk"
+//        }
+//    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include "armeabi-v7a", "arm64-v8a"
+            universalApk false
         }
     }
 }

@@ -15,6 +15,7 @@ import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.SDCardUtils;
 import com.blankj.utilcode.util.ThreadUtils;
+import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.qasky.tfcard.C2SNegotiateInfo;
 import com.qasky.tfcard.QTF;
@@ -545,6 +546,36 @@ public class MainActivity extends AppCompatActivity {
                         ToastUtils.showShort(result ? "成功" : "失败");
                     }
                 });
+            }
+        });
+
+
+        findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StringBuilder sb = new StringBuilder();
+
+                String storeId = mQTF.exportStoreId();
+                String appName = cts_pcAppName;
+                String containerName = cts_pcConName;
+                String userName = "qinzhongbin";
+                String password = EncryptUtils.encryptMD5ToString("123456".getBytes());
+                long timeStamp = TimeUtils.getNowMills();
+
+                sb.append(storeId);
+                sb.append(appName);
+                sb.append(containerName);
+                sb.append(userName);
+                sb.append(password);
+                sb.append(timeStamp);
+
+                LogUtils.d(sb.toString());
+
+                String hash = EncryptUtils.encryptMD5ToString(sb.toString());
+
+                byte[] eccSignDigest = mQTF.ECCSignDigest(cts_pcAppName, cts_pcConName, cts_pcUserPin, hash.getBytes());
+                String sign = ConvertUtils.bytes2HexString(eccSignDigest);
+                LogUtils.d(sign);
             }
         });
     }
