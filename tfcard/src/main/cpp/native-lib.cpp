@@ -191,6 +191,11 @@ Java_com_qasky_tfcard_QTF_mockC2SNegotiateKey(JNIEnv *env, jobject thiz, jstring
     unsigned char pucKey[16] = {0};
     unsigned char pucSoftKey[128] = {0};
 
+    if(strlen(pcAddr) >= 5 && 0 == strcmp(pcAddr + strlen(pcAddr) - 5, "18890"))
+    {
+        QCard_SetSSL(0);
+    }
+
     ret = QCard_RequestCTSKeyByApp(pcAddr, storeId, pcAppName, pcConName, 16, pucKey, pucSoftKey, &pcFlag, pcCheckCode);
 
     env->ReleaseStringUTFChars(pc_addr, pcAddr);
