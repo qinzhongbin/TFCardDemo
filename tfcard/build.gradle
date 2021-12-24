@@ -2,7 +2,6 @@ plugins {
     id 'com.android.library'
 }
 
-def cmd_gitCommitCount = 'git rev-list HEAD --first-parent --count'
 def cmd_gitVersionTag = 'git describe --tags --dirty'
 
 android {

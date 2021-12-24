@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <android/log.h>
-#include <android/log.h>
 #include <qcard_type.h>
 #include <qcard.h>
 #include <cstring>
@@ -11,6 +10,7 @@
 #include <curl/curl.h>
 #include <iostream>
 #include <skf_type.h>
+#include <SKF.h>
 
 #define LOG_TAG "Qasky"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -19,12 +19,12 @@
     do\
 {\
     int i;\
-    for(i=0;i<l;i++)\
+    for(i=1;i<=l;i++)\
 {\
-    if((i+1) % 16) \
-    LOGD("%02X ", d[i]);\
+    if(i % 16) \
+    LOGD("\n");\
         else\
-        LOGD("%02X", d[i]);\
+        LOGD("%02X ", d[i-1]);\
 }\
 }\
     while(0)
@@ -45,6 +45,7 @@ Java_com_qasky_tfcard_QTF_initRes(JNIEnv *env, jobject thiz, jstring pkg_name) {
     char *appPath = static_cast<char *>(malloc(strlen(appPath_pre) + strlen(pkgName)));
     strcpy(appPath, appPath_pre);
     strcat(appPath, pkgName);
+    phStoreHandles = nullptr;
     ret = QCard_EnumStoreHandle(&phStoreHandles, pkgName, appPath);
     env->ReleaseStringUTFChars(pkg_name, pkgName);
 
@@ -373,8 +374,8 @@ Java_com_qasky_tfcard_QTF_hardEncrypt(JNIEnv *env, jobject thiz, jbyteArray data
     jbyte *data_src_jbyte = env->GetByteArrayElements(data, JNI_FALSE);
     unsigned char *data_src = reinterpret_cast<unsigned char *>(data_src_jbyte);
 
-    unsigned char data_dest[len_src];
-    unsigned long len_dest = len_src;
+    unsigned long len_dest = len_src + 16;
+    unsigned char data_dest[len_dest];
     memset(data_dest, 0, sizeof(data_dest));
 
     ret = QCard_Encrypt(phStoreHandles[0], hKeyHandle, data_src, len_src, data_dest, &len_dest);
@@ -784,4 +785,78 @@ Java_com_qasky_tfcard_QTF_testCurl(JNIEnv *env, jobject thiz) {
     LOGD("res = %d", res);
 
     return 0;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_qasky_tfcard_QTF_exportSystemId(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name) {
+    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
+    char *pcConName = const_cast<char *>(env->GetStringUTFChars(pc_container_name, JNI_FALSE));
+    char pcSystemId[126] = {0};
+
+    int ret = 0;
+
+    LOGD("pcAppName = %s", pcAppName);
+    LOGD("pcConName = %s", pcConName);
+
+
+    ret = QCard_GetSysTemId(phStoreHandles[0], pcAppName, pcConName, pcSystemId);
+    if (ret) {
+        LOGE("QCard_GetSysTemId error: %x", ret);
+    }
+
+    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
+    env->ReleaseStringUTFChars(pc_container_name, pcConName);
+    return env->NewStringUTF(pcSystemId);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_qasky_tfcard_QTF_test(JNIEnv *env, jobject thiz) {
+
+     char *pkgName = "com.qasky.tfcarddemo";
+     char *appPath = "Android/data/com.qasky.tfcarddemo";
+
+
+    extern int sd_SetPackageName(char *packageName);
+    sd_SetPackageName(pkgName);
+
+    V_SetAppPath(appPath);
+
+    char devlist[256] = {0};
+    int ret;
+    u32 devlist_len = 256;
+    ret = SKF_EnumDev(0, devlist, &devlist_len );
+    LOGD("#########   ret is 0x%x\n", ret);
+LOGD("#########   devlist is %s\n", devlist);
+
+    if(0 == devlist_len)
+    {
+        devlist_len = 256;
+        ret = SKF_EnumDev(1, devlist, &devlist_len );
+        LOGD("#########   ret is 0x%x\n", ret);
+        LOGD("#########   devlist is %s\n", devlist);
+
+        if(0 == devlist_len)
+        {
+            return;
+        }
+    }
+
+    void *dev;
+    ret = SKF_ConnectDev(devlist, &dev);
+    LOGD("#########   ret is 0x%x\n", ret);
+    void *app1,*app2;
+    ret = SKF_OpenApplication(dev, "SCWJCTSASYM", &app1);
+    LOGD("#########   ret is 0x%x\n", ret);
+    ret = SKF_OpenApplication(dev, "DEFAULT", &app2);
+    LOGD("#########   ret is 0x%x\n", ret);
+    ret = SKF_CloseApplication(app1);
+    LOGD("#########   ret is 0x%x\n", ret);
+    ret = SKF_CloseApplication(app2);
+    LOGD("#########   ret is 0x%x\n", ret);
+    ret = SKF_DisConnectDev(dev);
+    LOGD("#########   ret is 0x%x\n", ret);
+
+
 }

@@ -45,11 +45,24 @@
                     android:text="销毁资源" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/exportStoreId"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="导出设备序列号" />
+                android:gravity="center">
+                <Button
+                    android:id="@+id/exportStoreId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="导出设备序列号" />
+
+                <Button
+                    android:id="@+id/exportSystemId"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_height="wrap_content"
+                    android:text="导出应用系统编号" />
+            </LinearLayout>
+
 
             <LinearLayout
                 android:id="@+id/container_c2s"

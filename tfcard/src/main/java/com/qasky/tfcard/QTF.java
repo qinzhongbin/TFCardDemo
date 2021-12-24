@@ -24,6 +24,14 @@ public class QTF {
     public native String exportStoreId();
 
     /**
+     *
+     * @param pcAppName
+     * @param pcContainerName
+     * @return
+     */
+    public native String exportSystemId(String pcAppName, String pcContainerName);
+
+    /**
      * 查询密钥长度（字节Byte）
      *
      * @param pcAppName       应用名称
@@ -157,4 +165,6 @@ public class QTF {
      * @return PIN是否正确
      */
     public native boolean verifyAppPIN(String pcAppName, String pcUserPin, int retriesRemaining);
+
+    public native void test();
 }
