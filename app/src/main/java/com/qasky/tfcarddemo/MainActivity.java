@@ -1,17 +1,15 @@
 package com.qasky.tfcarddemo;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+
 import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.EncryptUtils;
-import com.blankj.utilcode.util.FileIOUtils;
-import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.SDCardUtils;
 import com.blankj.utilcode.util.ThreadUtils;
@@ -20,12 +18,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.qasky.tfcard.C2SNegotiateInfo;
 import com.qasky.tfcard.QTF;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import kotlin.UByteArray;
 
 public class MainActivity extends AppCompatActivity {
     QTF mQTF = new QTF();
@@ -33,8 +26,8 @@ public class MainActivity extends AppCompatActivity {
 //    armeabi-v7a不兼容HTTPS，使用18890端口
     String cts_pcAddr = "112.27.97.202:8890";
 
-    String cts_pcAppName = "SCBCTS";
-    String cts_pcConName = "SCBCTS";
+    String cts_pcAppName = "SCWJCTS";
+    String cts_pcConName = "SCWJCTS";
     String cts_pcUserPin = "12222222";
     String ctc_pcAppName = "SCBCTC";
     String ctc_pcConName = "SCBCTC";
@@ -118,6 +111,23 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(String pcStoreId) {
                         pcSoreId = pcStoreId;
                         ToastUtils.showShort("pcStoreId = " + pcStoreId);
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.exportSystemId).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+                    @Override
+                    public String doInBackground() throws Throwable {
+                        return mQTF.exportSystemId(cts_pcAppName, cts_pcConName);
+                    }
+
+                    @Override
+                    public void onSuccess(String systemID) {
+                        ToastUtils.showShort("systemID = " + systemID);
                     }
                 });
             }
@@ -549,33 +559,33 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                StringBuilder sb = new StringBuilder();
-
-                String storeId = mQTF.exportStoreId();
-                String appName = cts_pcAppName;
-                String containerName = cts_pcConName;
-                String userName = "qinzhongbin";
-                String password = EncryptUtils.encryptMD5ToString("123456".getBytes());
-                long timeStamp = TimeUtils.getNowMills();
-
-                sb.append(storeId);
-                sb.append(appName);
-                sb.append(containerName);
-                sb.append(userName);
-                sb.append(password);
-                sb.append(timeStamp);
-
-                LogUtils.d(sb.toString());
-
-                String hash = EncryptUtils.encryptMD5ToString(sb.toString());
-
-                byte[] eccSignDigest = mQTF.ECCSignDigest(cts_pcAppName, cts_pcConName, cts_pcUserPin, hash.getBytes());
-                String sign = ConvertUtils.bytes2HexString(eccSignDigest);
-                LogUtils.d(sign);
-            }
-        });
+//        findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                StringBuilder sb = new StringBuilder();
+//
+//                String storeId = mQTF.exportStoreId();
+//                String appName = cts_pcAppName;
+//                String containerName = cts_pcConName;
+//                String userName = "qinzhongbin";
+//                String password = EncryptUtils.encryptMD5ToString("123456".getBytes());
+//                long timeStamp = TimeUtils.getNowMills();
+//
+//                sb.append(storeId);
+//                sb.append(appName);
+//                sb.append(containerName);
+//                sb.append(userName);
+//                sb.append(password);
+//                sb.append(timeStamp);
+//
+//                LogUtils.d(sb.toString());
+//
+//                String hash = EncryptUtils.encryptMD5ToString(sb.toString());
+//
+//                byte[] eccSignDigest = mQTF.ECCSignDigest(cts_pcAppName, cts_pcConName, cts_pcUserPin, hash.getBytes());
+//                String sign = ConvertUtils.bytes2HexString(eccSignDigest);
+//                LogUtils.d(sign);
+//            }
+//        });
     }
 }

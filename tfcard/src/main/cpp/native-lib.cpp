@@ -110,6 +110,29 @@ Java_com_qasky_tfcard_QTF_exportStoreId(JNIEnv *env, jobject thiz) {
 }
 
 extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_qasky_tfcard_QTF_exportSystemId(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name) {
+    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
+    char *pcConName = const_cast<char *>(env->GetStringUTFChars(pc_container_name, JNI_FALSE));
+    char pcSystemId[126] = {0};
+
+    int ret = 0;
+
+    LOGD("pcAppName = %s", pcAppName);
+    LOGD("pcConName = %s", pcConName);
+
+
+    ret = QCard_GetSysTemId(phStoreHandles[0], pcAppName, pcConName, pcSystemId);
+    if (ret) {
+        LOGE("QCard_GetSysTemId error: %x", ret);
+    }
+
+    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
+    env->ReleaseStringUTFChars(pc_container_name, pcConName);
+    return env->NewStringUTF(pcSystemId);
+}
+
+extern "C"
 JNIEXPORT jintArray JNICALL
 Java_com_qasky_tfcard_QTF_queryKeyLength(JNIEnv *env, jobject thiz, jstring pc_app_name, jstring pc_container_name, jstring store_id) {
     if (phStoreHandles == nullptr || phStoreHandles[0] == nullptr) {
