@@ -27,8 +27,8 @@ public class MainActivity extends AppCompatActivity {
     // armeabi-v7a不兼容HTTPS，使用18890端口
     String cts_pcAddr = "112.27.97.202:8890";
 
-    String cts_pcAppName = "SCWJCTSASYM";
-    String cts_pcConName = "SCWJCTSASYM";
+    String cts_pcAppName = "SCWJCTSSYM";
+    String cts_pcConName = "SCWJCTSSYM";
     String cts_pcUserPin = "12222222";
     String ctc_pcAppName = "SCBCTC";
     String ctc_pcConName = "SCBCTC";
@@ -128,22 +128,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.exportSystemId).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
-                    @Override
-                    public String doInBackground() throws Throwable {
-                        return mQTF.exportSystemId(cts_pcAppName, cts_pcConName);
-                    }
-
-                    @Override
-                    public void onSuccess(String systemID) {
-                        ToastUtils.showShort("systemID = " + systemID);
-                    }
-                });
-            }
-        });
+//        findViewById(R.id.exportSystemId).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                ThreadUtils.executeByIo(new ThreadUtils.SimpleTask<String>() {
+//                    @Override
+//                    public String doInBackground() throws Throwable {
+//                        return mQTF.exportSystemId(cts_pcAppName, cts_pcConName);
+//                    }
+//
+//                    @Override
+//                    public void onSuccess(String systemID) {
+//                        ToastUtils.showShort("systemID = " + systemID);
+//                    }
+//                });
+//            }
+//        });
 
         findViewById(R.id.c2sNegotiateKey).setOnClickListener(new View.OnClickListener() {
             @Override
