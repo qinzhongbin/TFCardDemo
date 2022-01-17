@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     QTF mQTF = new QTF();
 
     // armeabi-v7a不兼容HTTPS，使用18890端口
-    String cts_pcAddr = "112.27.97.202:8890";
+    String cts_pcAddr = "112.27.97.202:18890";
 
     String cts_pcAppName = "SCWJCTSSYM";
     String cts_pcConName = "SCWJCTSSYM";
