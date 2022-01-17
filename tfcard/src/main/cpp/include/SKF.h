@@ -28,6 +28,10 @@ extern "C" {
 #endif
 
 
+#ifndef BOOL
+#define BOOL	unsigned int
+#endif
+
 #ifndef _WIN32
 #define SKF_FUN_DEF(name,args) extern u32 __attribute__ ((visibility("default"))) name args
 #else

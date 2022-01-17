@@ -2,7 +2,6 @@ plugins {
     id 'com.android.library'
 }
 
-def cmd_gitCommitCount = 'git rev-list HEAD --first-parent --count'
 def cmd_gitVersionTag = 'git describe --tags --dirty'
 
 android {
@@ -18,7 +17,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                abiFilters 'armeabi-v7a', 'arm64-v8a' // ABIs编译配置
+                abiFilters 'armeabi-v7a'/*, 'arm64-v8a'*/ // ABIs编译配置
             }
         }
     }

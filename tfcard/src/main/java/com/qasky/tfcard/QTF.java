@@ -165,4 +165,6 @@ public class QTF {
      * @return PIN是否正确
      */
     public native boolean verifyAppPIN(String pcAppName, String pcUserPin, int retriesRemaining);
+
+    public native void test();
 }
