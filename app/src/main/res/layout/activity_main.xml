@@ -49,6 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center">
+
                 <Button
                     android:id="@+id/exportStoreId"
                     android:layout_width="wrap_content"
@@ -58,8 +59,8 @@
                 <Button
                     android:id="@+id/exportSystemId"
                     android:layout_width="wrap_content"
-                    android:layout_marginStart="10dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
                     android:text="导出应用系统编号" />
             </LinearLayout>
 
@@ -252,6 +253,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="验证PIN" />
+
+            <Button
+                android:id="@+id/clientRequestOnlineBizKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="协商在线业务密钥"
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/test"

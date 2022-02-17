@@ -11,42 +11,7 @@
 #include <iostream>
 #include <skf_type.h>
 #include <SKF.h>
-
-#define LOG_TAG "Qasky"
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-#define LOG_DATA(d, l)\
-    do\
-{\
-    int i;\
-    for(i=0;i<l;i++)\
-{\
-    if((i+1) % 16) \
-    LOGD("%02X ", d[i]);\
-        else\
-        LOGD("%02X", d[i]);\
-}\
-}\
-    while(0)
-
-void ByteToHexStr(const unsigned char *source, char *dest, int sourceLen) {
-    unsigned char highByte, lowByte;
-    strlen(reinterpret_cast<const char *const>(source));
-
-
-    for (int i = 0; i < sourceLen; i++) {
-        highByte = source[i] >> 4;
-        lowByte = source[i] & 0x0f;
-
-        highByte += 0x30;
-        if (highByte > 0x39) dest[i * 2] = highByte + 0x07;
-        else dest[i * 2] = highByte;
-
-        lowByte += 0x30;
-        if (lowByte > 0x39) dest[i * 2 + 1] = lowByte + 0x07;
-        else dest[i * 2 + 1] = lowByte;
-    }
-}
+#include <log.h>
 
 QHANDLES phStoreHandles = nullptr;
 KEYHANDLE hKeyHandle = nullptr;
@@ -56,7 +21,7 @@ extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_qasky_tfcard_QTF_initRes(JNIEnv *env, jobject thiz, jstring pkg_name) {
     char *pkgName = const_cast<char *>(env->GetStringUTFChars(pkg_name, JNI_FALSE));
-    LOGE("pkgName = %s", pkgName);
+    LOGD("pkgName = %s", pkgName);
 
     int ret = 0;
 
@@ -68,7 +33,7 @@ Java_com_qasky_tfcard_QTF_initRes(JNIEnv *env, jobject thiz, jstring pkg_name) {
     ret = QCard_EnumStoreHandle(&phStoreHandles, pkgName, appPath);
     env->ReleaseStringUTFChars(pkg_name, pkgName);
 
-    LOGE("deviceNum = %d", ret);
+    LOGD("deviceNum = %d", ret);
     if (ret <= 0) {
         LOGE("QCard_EnumStoreHandle error: %x", ret);
         return JNI_FALSE;
@@ -219,82 +184,82 @@ Java_com_qasky_tfcard_QTF_onlineChargingKey(JNIEnv *env, jobject thiz, jstring p
     return JNI_TRUE;
 }
 
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_QTF_mockC2SNegotiateKey(JNIEnv *env, jobject thiz, jstring pc_addr,
-                                              jstring pc_app_name, jstring pc_container_name,
-                                              jstring store_id, jobject c2s_negotiate_info) {
-    if (store_id == nullptr) {
-        LOGE("设备序列号为空");
-        return JNI_FALSE;
-    }
-
-    int ret = 0;
-
-    char *pcAddr = const_cast<char *>(env->GetStringUTFChars(pc_addr, JNI_FALSE));
-    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
-    char *pcConName = const_cast<char *>(env->GetStringUTFChars(pc_container_name, JNI_FALSE));
-    char *storeId = const_cast<char *>(env->GetStringUTFChars(store_id, JNI_FALSE));
-
-    char *pcFlag = nullptr;
-    char pcCheckCode[64] = {0};
-    unsigned char pucKey[16] = {0};
-    unsigned char pucSoftKey[128] = {0};
-
-    if (strlen(pcAddr) >= 5 && 0 == strcmp(pcAddr + strlen(pcAddr) - 5, "18890")) {
-        QCard_SetSSL(0);
-    }
-
-    ret = QCard_RequestCTSKeyByApp(pcAddr, storeId, pcAppName, pcConName, 16, pucKey, pucSoftKey,
-                                   &pcFlag, pcCheckCode);
-
-    env->ReleaseStringUTFChars(pc_addr, pcAddr);
-    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
-    env->ReleaseStringUTFChars(pc_container_name, pcConName);
-    env->ReleaseStringUTFChars(store_id, storeId);
-
-    if (ret) {
-        LOGE("CTS密钥协商错误 ===> %x", ret);
-        return JNI_FALSE;
-    }
-
-    LOGD("硬密钥（C2S协商）：");
-    LOG_DATA(pucKey, 16);
-    LOGD("软密钥（C2S协商）：");
-    LOG_DATA(pucSoftKey, 16);
-
-    jbyteArray key = env->NewByteArray(16);
-    env->SetByteArrayRegion(key, 0, 16, reinterpret_cast<const jbyte *>(pucKey));
-    jbyteArray softKey = env->NewByteArray(16);
-    env->SetByteArrayRegion(softKey, 0, 16, reinterpret_cast<const jbyte *>(pucSoftKey));
-    jstring flag = env->NewStringUTF(pcFlag);
-    jstring checkCode = env->NewStringUTF(pcCheckCode);
-
-    jclass jclz_c2sNegotiateInfo = env->GetObjectClass(c2s_negotiate_info);
-    jmethodID jmid_setKey = env->GetMethodID(jclz_c2sNegotiateInfo, "setKey", "([B)V");
-    jmethodID jmid_setSoftKey = env->GetMethodID(jclz_c2sNegotiateInfo, "setSoftKey", "([B)V");
-    jmethodID jmid_setFlag = env->GetMethodID(jclz_c2sNegotiateInfo, "setFlag",
-                                              "(Ljava/lang/String;)V");
-    jmethodID jmid_setCheckCode = env->GetMethodID(jclz_c2sNegotiateInfo, "setCheckCode",
-                                                   "(Ljava/lang/String;)V");
-
-    env->CallVoidMethod(c2s_negotiate_info, jmid_setKey, key);
-    env->CallVoidMethod(c2s_negotiate_info, jmid_setSoftKey, softKey);
-    env->CallVoidMethod(c2s_negotiate_info, jmid_setFlag, flag);
-    env->CallVoidMethod(c2s_negotiate_info, jmid_setCheckCode, checkCode);
-
-//    env->DeleteLocalRef(key);
-//    env->DeleteLocalRef(softKey);
-//    env->ReleaseStringUTFChars(flag, pcFlag);
-//    env->ReleaseStringUTFChars(checkCode, pcCheckCode);
-
-    if (pcFlag != nullptr) {
-        free(pcFlag);
-        pcFlag = nullptr;
-    }
-
-    return JNI_TRUE;
-}
+//extern "C"
+//JNIEXPORT jboolean JNICALL
+//Java_com_qasky_tfcard_QTF_mockC2SNegotiateKey(JNIEnv *env, jobject thiz, jstring pc_addr,
+//                                              jstring pc_app_name, jstring pc_container_name,
+//                                              jstring store_id, jobject c2s_negotiate_info) {
+//    if (store_id == nullptr) {
+//        LOGE("设备序列号为空");
+//        return JNI_FALSE;
+//    }
+//
+//    int ret = 0;
+//
+//    char *pcAddr = const_cast<char *>(env->GetStringUTFChars(pc_addr, JNI_FALSE));
+//    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
+//    char *pcConName = const_cast<char *>(env->GetStringUTFChars(pc_container_name, JNI_FALSE));
+//    char *storeId = const_cast<char *>(env->GetStringUTFChars(store_id, JNI_FALSE));
+//
+//    char *pcFlag = nullptr;
+//    char pcCheckCode[64] = {0};
+//    unsigned char pucKey[16] = {0};
+//    unsigned char pucSoftKey[128] = {0};
+//
+//    if (strlen(pcAddr) >= 5 && 0 == strcmp(pcAddr + strlen(pcAddr) - 5, "18890")) {
+//        QCard_SetSSL(0);
+//    }
+//
+//    ret = QCard_RequestCTSKeyByApp(pcAddr, storeId, pcAppName, pcConName, 16, pucKey, pucSoftKey,
+//                                   &pcFlag, pcCheckCode);
+//
+//    env->ReleaseStringUTFChars(pc_addr, pcAddr);
+//    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
+//    env->ReleaseStringUTFChars(pc_container_name, pcConName);
+//    env->ReleaseStringUTFChars(store_id, storeId);
+//
+//    if (ret) {
+//        LOGE("CTS密钥协商错误 ===> %x", ret);
+//        return JNI_FALSE;
+//    }
+//
+//    LOGD("硬密钥（C2S协商）：");
+//    LOG_DATA(pucKey, 16);
+//    LOGD("软密钥（C2S协商）：");
+//    LOG_DATA(pucSoftKey, 16);
+//
+//    jbyteArray key = env->NewByteArray(16);
+//    env->SetByteArrayRegion(key, 0, 16, reinterpret_cast<const jbyte *>(pucKey));
+//    jbyteArray softKey = env->NewByteArray(16);
+//    env->SetByteArrayRegion(softKey, 0, 16, reinterpret_cast<const jbyte *>(pucSoftKey));
+//    jstring flag = env->NewStringUTF(pcFlag);
+//    jstring checkCode = env->NewStringUTF(pcCheckCode);
+//
+//    jclass jclz_c2sNegotiateInfo = env->GetObjectClass(c2s_negotiate_info);
+//    jmethodID jmid_setKey = env->GetMethodID(jclz_c2sNegotiateInfo, "setKey", "([B)V");
+//    jmethodID jmid_setSoftKey = env->GetMethodID(jclz_c2sNegotiateInfo, "setSoftKey", "([B)V");
+//    jmethodID jmid_setFlag = env->GetMethodID(jclz_c2sNegotiateInfo, "setFlag",
+//                                              "(Ljava/lang/String;)V");
+//    jmethodID jmid_setCheckCode = env->GetMethodID(jclz_c2sNegotiateInfo, "setCheckCode",
+//                                                   "(Ljava/lang/String;)V");
+//
+//    env->CallVoidMethod(c2s_negotiate_info, jmid_setKey, key);
+//    env->CallVoidMethod(c2s_negotiate_info, jmid_setSoftKey, softKey);
+//    env->CallVoidMethod(c2s_negotiate_info, jmid_setFlag, flag);
+//    env->CallVoidMethod(c2s_negotiate_info, jmid_setCheckCode, checkCode);
+//
+////    env->DeleteLocalRef(key);
+////    env->DeleteLocalRef(softKey);
+////    env->ReleaseStringUTFChars(flag, pcFlag);
+////    env->ReleaseStringUTFChars(checkCode, pcCheckCode);
+//
+//    if (pcFlag != nullptr) {
+//        free(pcFlag);
+//        pcFlag = nullptr;
+//    }
+//
+//    return JNI_TRUE;
+//}
 
 extern "C"
 JNIEXPORT jboolean JNICALL
@@ -520,12 +485,7 @@ Java_com_qasky_tfcard_QTF_getSoftKey(JNIEnv *env, jobject thiz) {
         return nullptr;
     }
 
-    LOGD("软密钥（设备导出）：");
-    LOG_DATA(pucSoftKey, 16);
-
-    char sk[33] = {0};
-    ByteToHexStr(pucSoftKey, sk, 16);
-    LOGD("sk = %s", sk);
+    LOGD("pucSoftKey = %s", ByteArrayToHexStr(pucSoftKey, 16));
 
     jbyteArray softKey = env->NewByteArray(16);
     env->SetByteArrayRegion(softKey, 0, 16, reinterpret_cast<const jbyte *>(pucSoftKey));
@@ -711,7 +671,6 @@ Java_com_qasky_tfcard_QTF_sm3Digest(JNIEnv *env, jobject thiz, jstring pc_app_na
     if (ret) {
         LOGE("QCard_SM3DigestData ERROR: %x", ret);
     }
-    LOG_DATA(digest, digestLen);
 
     jbyteArray j_digest = env->NewByteArray(digestLen);
     env->SetByteArrayRegion(j_digest, 0, digestLen, reinterpret_cast<const jbyte *>(digest));
@@ -829,4 +788,83 @@ Java_com_qasky_tfcard_QTF_verifyAppPIN(JNIEnv *env, jobject thiz, jstring pc_app
 
     LOGD("验证PIN剩余次数：%lu", retriesRemaining);
     return !ret;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_qasky_tfcard_QTF_test(JNIEnv *env, jobject thiz) {
+    int ret = 0;
+    char *g_ip = "112.27.97.202:8890";
+    int secretSize = 16;
+    char validityDate[64] = "2023-10-01 09:00:00";
+    char *serverId = "WT-QKMS100_001";
+    char *visitKeyBase64 = "JLz3wNv1g8cTbiOBMaE+xl+lEzvqeqYKghYk+rJZxAa8c+Aq8VCeMxi7u0a7vaHVWOjuePeXoM7JFEeAZy64xA==";
+    const auto *protectKey = reinterpret_cast<const unsigned char *>("123456");
+    char *systemId = "000000044";
+    char secretId[128] = {0};
+
+
+    /* 创建业务密钥 */
+    ret = QCard_CreateOnlineBizKey(g_ip, secretSize, validityDate, systemId, serverId, visitKeyBase64, protectKey, secretId);
+    LOGD("QCard_CreateOnlineBizKey ret = 0x%08x secretId = %s", ret, secretId);
+
+    /* 服务端协商业务密钥 */
+    unsigned char *onlineBizKey = nullptr;
+    unsigned long onlineBizKeyLen = 0;
+    ret = QCard_ServerRequestOnlineBizKey(g_ip, systemId, secretId, serverId, visitKeyBase64, protectKey, &onlineBizKey, &onlineBizKeyLen);
+    LOGD("QCard_ServerRequestOnlineBizKey ret = 0x%08x onlineBizKey = %s onlineBizKeyLen = %lu secretId = %s", ret, onlineBizKey, onlineBizKeyLen, secretId);
+
+    char storeId[32] = {0};
+    ret = QCard_GetStoreId(phStoreHandles[0], storeId);
+    LOGD("QCard_GetStoreId ret = 0x%08x storeId = %s", ret, storeId);
+
+    /* 客户端协商业务密钥 */
+    char *pcFlag = nullptr;
+    char pcCheckCode[64] = {0};
+    ret = QCard_ClientRequestOnlineBizKey(g_ip, storeId, systemId, secretId, serverId, visitKeyBase64, protectKey, &pcFlag, pcCheckCode);
+    LOGD("QCard_ClientRequestOnlineBizKey ret = 0x%08x \npcFlag = \n%s\npcCheckCode = %s", ret, pcFlag, pcCheckCode);
+
+    /* 清除业务密钥 */
+    ret = QCard_cleanNegotiateOnlineBizKey(g_ip, systemId, secretId, serverId, visitKeyBase64, protectKey);
+    LOGD("QCard_cleanNegotiateOnlineBizKey ret = 0x%08x", ret);
+}
+
+
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_qasky_tfcard_QTF_clientRequestOnlineBizKey(JNIEnv *env, jobject thiz, jstring pc_addr, jstring pc_store_id, jstring system_id, jstring secret_id, jstring server_id, jstring visit_key_base64, jstring protect_key) {
+    char *pcAddr = const_cast<char *>(env->GetStringUTFChars(pc_addr, JNI_FALSE));
+    char *pcStoreId = const_cast<char *>(env->GetStringUTFChars(pc_store_id, JNI_FALSE));
+    char *systemId = const_cast<char *>(env->GetStringUTFChars(system_id, JNI_FALSE));
+    char *secretId = const_cast<char *>(env->GetStringUTFChars(secret_id, JNI_FALSE));
+    char *serverId = const_cast<char *>(env->GetStringUTFChars(server_id, JNI_FALSE));
+    char *visitKeyBase64 = const_cast<char *>(env->GetStringUTFChars(visit_key_base64, JNI_FALSE));
+    char *protectKey = const_cast<char *>(env->GetStringUTFChars(protect_key, JNI_FALSE));
+    char *pcFlag = nullptr;
+    char pcCheckCode[64] = {0};
+
+    LOGD("pcAddr = %s", pcAddr);
+    LOGD("pcStoreId = %s", pcStoreId);
+    LOGD("systemId = %s", systemId);
+    LOGD("secretId = %s", secretId);
+    LOGD("serverId = %s", serverId);
+    LOGD("visitKeyBase64 = %s", visitKeyBase64);
+    LOGD("protectKey = %s", protectKey);
+    int ret = QCard_ClientRequestOnlineBizKey(pcAddr, pcStoreId, systemId, secretId, serverId, visitKeyBase64, reinterpret_cast<const unsigned char *>(protectKey), &pcFlag, pcCheckCode);
+    LOGD("QCard_ClientRequestOnlineBizKey ret = 0x%08x \npcFlag = \n%s\npcCheckCode = %s", ret, pcFlag, pcCheckCode);
+
+    jclass clz_ConsultInfo = env->FindClass("com/qasky/tfcard/ConsultInfo");
+    jobject obj_ConsultInfo = env->NewObject(clz_ConsultInfo, env->GetMethodID(clz_ConsultInfo, "<init>", "()V"));
+    env->SetObjectField(obj_ConsultInfo, env->GetFieldID(clz_ConsultInfo, "flag", "Ljava/lang/String;"), env->NewStringUTF(pcFlag));
+    env->SetObjectField(obj_ConsultInfo, env->GetFieldID(clz_ConsultInfo, "checkCode", "Ljava/lang/String;"), env->NewStringUTF(pcCheckCode));
+
+    env->ReleaseStringUTFChars(pc_addr, pcAddr);
+    env->ReleaseStringUTFChars(pc_store_id, pcStoreId);
+    env->ReleaseStringUTFChars(system_id, systemId);
+    env->ReleaseStringUTFChars(secret_id, secretId);
+    env->ReleaseStringUTFChars(server_id, serverId);
+    env->ReleaseStringUTFChars(visit_key_base64, visitKeyBase64);
+    env->ReleaseStringUTFChars(protect_key, protectKey);
+    return obj_ConsultInfo;
 }

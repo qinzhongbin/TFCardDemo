@@ -52,16 +52,16 @@ public class QTF {
      */
     public native boolean onlineChargingKey(String pcAddr, String pcAppName, String pcContainerName, String pcUserPin);
 
-    /**
-     * C2S协商密钥
-     *
-     * @param pcAddr          服务器IP地址
-     * @param pcAppName       应用名称
-     * @param pcContainerName 容器名称
-     * @param storeId         设备序列号
-     * @return 协商是否成功
-     */
-    public native boolean mockC2SNegotiateKey(String pcAddr, String pcAppName, String pcContainerName, String storeId, C2SNegotiateInfo c2SNegotiateInfo);
+//    /**
+//     * C2S协商密钥
+//     *
+//     * @param pcAddr          服务器IP地址
+//     * @param pcAppName       应用名称
+//     * @param pcContainerName 容器名称
+//     * @param storeId         设备序列号
+//     * @return 协商是否成功
+//     */
+//    public native boolean mockC2SNegotiateKey(String pcAddr, String pcAppName, String pcContainerName, String storeId, ConsultInfo consultInfo);
 
     /**
      * C2S获取密钥句柄
@@ -165,6 +165,8 @@ public class QTF {
      * @return PIN是否正确
      */
     public native boolean verifyAppPIN(String pcAppName, String pcUserPin, int retriesRemaining);
+
+    public native ConsultInfo clientRequestOnlineBizKey(String pcAddr, String pcStoreId, String systemId, String secretId, String serverId, String visitKeyBase64, String protectKey);
 
     public native void test();
 }
