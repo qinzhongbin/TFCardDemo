@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,274 +8,210 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/modeSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_margin="10dp"
-            android:text="C2S" />
-
-        <LinearLayout
+        <androidx.appcompat.widget.AppCompatButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="10dp">
+            android:onClick="resetParams"
+            android:text="参数设置" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-                <Button
-                    android:id="@+id/initRes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="初始化资源" />
-
-                <Button
-                    android:id="@+id/destroyRes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="销毁资源" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/enumDev"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center">
+                android:onClick="enumDev"
+                android:text="枚举设备"
+                app:layout_constraintEnd_toStartOf="@id/freeDev"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
-                    android:id="@+id/exportStoreId"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="导出设备序列号" />
-
-                <Button
-                    android:id="@+id/exportSystemId"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="导出应用系统编号" />
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:id="@+id/container_c2s"
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/freeDev"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:onClick="freeDev"
+                android:text="释放设备句柄"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/enumDev"
+                app:layout_constraintTop_toTopOf="@id/enumDev" />
 
-                <Button
-                    android:id="@+id/c2sNegotiateKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="C2S协商密钥" />
-
-                <Button
-                    android:id="@+id/getKeyHandleByC2S"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="C2S获取密钥句柄" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/container_c2c"
-                android:layout_width="match_parent"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/loginDev"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="50dp"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:onClick="loginDev"
+                android:text="登录设备"
+                app:layout_constraintEnd_toStartOf="@id/logoutDev"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/enumDev" />
 
-                <EditText
-                    android:id="@+id/et_otherStoreId"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:hint="对端设备序列号" />
-
-                <Button
-                    android:id="@+id/getAuthSyncFlag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="C2C获取同步认证码" />
-
-                <EditText
-                    android:id="@+id/et_authSynFlag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:hint="对端同步认证码" />
-
-                <Button
-                    android:id="@+id/c2cSyncAuth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="C2C同步认证" />
-
-                <Button
-                    android:id="@+id/getKeyHandleByC2C"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="C2C获取密钥句柄" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:id="@+id/hardEncrypt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="硬加密" />
-
-                <Button
-                    android:id="@+id/hardDecrypt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="硬解密" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/exportSoftKey"
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/logoutDev"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="导出软密钥" />
+                android:onClick="logoutDev"
+                android:text="登出设备"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/loginDev"
+                app:layout_constraintTop_toTopOf="@id/loginDev" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:id="@+id/softEncrypt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="软加密" />
-
-                <Button
-                    android:id="@+id/softDecrypt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="软解密" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:id="@+id/exportEncCert"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="导出加密证书" />
-
-                <Button
-                    android:id="@+id/exportSignCert"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="导出签名证书" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:id="@+id/exportEncPubKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="导出加密公钥" />
-
-                <Button
-                    android:id="@+id/exportSignPubKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="导出签名公钥" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/sm3Digest"
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/initResource"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="SM3计算摘要" />
+                android:onClick="initResource"
+                android:text="初始化资源"
+                app:layout_constraintEnd_toStartOf="@id/updateResource"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/loginDev" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:id="@+id/rsaSignDigest"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="RSA签名摘要" />
-
-                <Button
-                    android:id="@+id/eccSignDigest"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="ECC签名摘要" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/updateResource"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:onClick="updateResource"
+                android:text="更新资源"
+                app:layout_constraintEnd_toStartOf="@id/destroyResource"
+                app:layout_constraintStart_toEndOf="@id/initResource"
+                app:layout_constraintTop_toTopOf="@id/initResource" />
 
-                <Button
-                    android:id="@+id/queryKeyLength"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="查询密钥长度" />
-
-                <Button
-                    android:id="@+id/onlineChargingKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="在线充注密钥" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/verifyPin"
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/destroyResource"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="验证PIN" />
+                android:onClick="destroyResource"
+                android:text="销毁资源"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/updateResource"
+                app:layout_constraintTop_toTopOf="@id/updateResource" />
 
-            <Button
-                android:id="@+id/clientRequestOnlineBizKey"
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/getDevId"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:onClick="getDevId"
+                android:text="获取设备ID"
+                app:layout_constraintEnd_toStartOf="@id/getSysId"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/initResource" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/getSysId"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="getSysId"
+                android:text="获取系统ID"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/getDevId"
+                app:layout_constraintTop_toTopOf="@id/getDevId" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/queryKeyLength"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="queryKeyLength"
+                android:text="查询密钥余量"
+                app:layout_constraintEnd_toStartOf="@id/chargeKey"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/getDevId" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/chargeKey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="chargeKey"
+                android:text="充注密钥"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/queryKeyLength"
+                app:layout_constraintTop_toTopOf="@id/queryKeyLength" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/CTSNegotiate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="CTSNegotiate"
+                android:text="CTS协商密钥"
+                app:layout_constraintEnd_toStartOf="@id/negoOLBizKey"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/queryKeyLength" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/negoOLBizKey"
+                android:layout_width="0dp"
+                android:onClick="negoOLBizKey"
+                android:layout_height="wrap_content"
                 android:text="协商在线业务密钥"
-                android:textSize="12sp" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/CTSNegotiate"
+                app:layout_constraintTop_toTopOf="@id/CTSNegotiate" />
 
-            <Button
-                android:id="@+id/test"
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/getKeyHandle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="TEST" />
-        </LinearLayout>
+                android:onClick="getKeyHandle"
+                android:text="获取密钥句柄"
+                app:layout_constraintEnd_toStartOf="@id/freeKeyHandle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/CTSNegotiate" />
 
-        <EditText
-            android:id="@+id/plain"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:gravity="center"
-            android:hint="待加密明文" />
-    </LinearLayout>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/freeKeyHandle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="freeKeyHandle"
+                android:text="释放密钥句柄"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/getKeyHandle"
+                app:layout_constraintTop_toTopOf="@id/getKeyHandle" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/encrypt"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="encrypt"
+                android:text="加密"
+                app:layout_constraintEnd_toStartOf="@id/decrypt"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/getKeyHandle" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/decrypt"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="decrypt"
+                android:text="解密"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/encrypt"
+                app:layout_constraintTop_toTopOf="@id/encrypt" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/getSoftKey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="getSoftKey"
+                android:text="获取软密钥"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/encrypt" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/test"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="test"
+                android:text="test"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/getSoftKey" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.core.widget.NestedScrollView>
