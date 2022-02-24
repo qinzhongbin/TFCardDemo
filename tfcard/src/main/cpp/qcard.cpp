@@ -33,7 +33,7 @@ Java_com_qasky_tfcard_QCard_enumDev(JNIEnv *env, jobject thiz, jstring pkg_name)
             handleInfo[i] = reinterpret_cast<long>(devHandles[i - 1]);
         }
         jlongArray longArray = env->NewLongArray(1 + ret);
-        env->SetLongArrayRegion(longArray, 0, 1 + ret, handleInfo);
+        env->SetLongArrayRegion(longArray, 0, 1 + ret, (const jlong *) handleInfo);
         return longArray;
     } else {
         return nullptr;
