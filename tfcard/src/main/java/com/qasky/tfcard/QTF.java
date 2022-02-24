@@ -1,6 +1,6 @@
 package com.qasky.tfcard;
 
-public class QCard {
+public class QTF {
 
     static {
         System.loadLibrary("QTF");

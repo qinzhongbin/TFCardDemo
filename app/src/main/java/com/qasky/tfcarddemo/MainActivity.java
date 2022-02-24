@@ -16,7 +16,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.reflect.TypeToken;
 import com.qasky.tfcard.NegotiateInfo;
-import com.qasky.tfcard.QCard;
+import com.qasky.tfcard.QTF;
 import com.qasky.tfcarddemo.dto.CleanOLBizKeyReq;
 import com.qasky.tfcarddemo.dto.CleanOLBizKeyResp;
 import com.qasky.tfcarddemo.dto.CreateOLBizKeyReq;
@@ -54,7 +54,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-    QCard qCard = new QCard();
+    QTF QTF = new QTF();
 
     HashMap<String, String> params = new HashMap<>();
     String host;
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
     long devHandle;
 
     public void enumDev(View view) {
-        long[] handleInfo = qCard.enumDev(getPackageName());
+        long[] handleInfo = QTF.enumDev(getPackageName());
         if (handleInfo != null && handleInfo.length > 1) {
             handles = handleInfo[0];
             LogUtils.d("handles = 0x" + Long.toHexString(handles));
@@ -152,58 +152,58 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void freeDev(View view) {
-        qCard.freeDev(handles);
+        QTF.freeDev(handles);
         ToastUtils.showLong("释放设备");
     }
 
     public void loginDev(View view) {
-        boolean success = qCard.loginDev(devHandle);
+        boolean success = QTF.loginDev(devHandle);
         ToastUtils.showLong("登录设备" + (success ? "成功" : "失败"));
     }
 
     public void logoutDev(View view) {
-        boolean success = qCard.logoutDev(devHandle);
+        boolean success = QTF.logoutDev(devHandle);
         ToastUtils.showLong("登录设备" + (success ? "成功" : "失败"));
     }
 
     public void initResource(View view) {
-        boolean success = qCard.initResource(devHandle);
+        boolean success = QTF.initResource(devHandle);
         ToastUtils.showLong("初始化资源" + (success ? "成功" : "失败"));
     }
 
     public void updateResource(View view) {
-        boolean success = qCard.updateResource(devHandle);
+        boolean success = QTF.updateResource(devHandle);
         ToastUtils.showLong("更新资源" + (success ? "成功" : "失败"));
     }
 
     public void destroyResource(View view) {
-        qCard.destroyResource(devHandle);
+        QTF.destroyResource(devHandle);
         ToastUtils.showLong("销毁资源");
     }
 
     String deviceId;
 
     public void getDevId(View view) {
-        deviceId = qCard.getDeviceId(devHandle);
+        deviceId = QTF.getDeviceId(devHandle);
         ToastUtils.showLong("设备ID: " + deviceId);
     }
 
     String systemId;
 
     public void getSysId(View view) {
-        systemId = qCard.getSystemId(devHandle, appName, conName);
+        systemId = QTF.getSystemId(devHandle, appName, conName);
         ToastUtils.showLong("系统ID: " + systemId);
     }
 
     public void queryKeyLength(View view) {
-        long[] keyLenInfo = qCard.queryKeyLength(devHandle, appName, conName);
+        long[] keyLenInfo = QTF.queryKeyLength(devHandle, appName, conName);
         ToastUtils.showLong("密钥总量: " + keyLenInfo[0] + "字节\n" + " 密钥已使用: " + keyLenInfo[1] + "字节");
     }
 
     public void chargeKey(View view) {
         new Thread(() -> {
             runOnUiThread(() -> waitingDialog.show());
-            boolean success = qCard.chargeKey(devHandle, host, appName, conName, userPIN);
+            boolean success = QTF.chargeKey(devHandle, host, appName, conName, userPIN);
             ToastUtils.showLong("密钥充注" + (success ? "成功" : "失败"));
             runOnUiThread(() -> waitingDialog.dismiss());
         }).start();
@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
 
                                     // step 3: 客户端协商在线业务密钥
                                     Thread.sleep(1000L); // 客户端协商时间应比服务端协商时间晚，模拟延时操作。
-                                    NegotiateInfo negotiateInfo = qCard.negoOLBizKey(host, deviceId, systemId, secretId, keyAppSvrId, secAuthKey, protectKey);
+                                    NegotiateInfo negotiateInfo = QTF.negoOLBizKey(host, deviceId, systemId, secretId, keyAppSvrId, secAuthKey, protectKey);
                                     if (negotiateInfo != null) {
                                         ToastUtils.showLong("在线业务密钥协商成功");
                                         negoInfos.add(negotiateInfo);
@@ -360,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("选择密钥协商信息检验码")
                 .setItems(negoInfos.stream().map(NegotiateInfo -> NegotiateInfo.checkCode).toArray(String[]::new), (dialog, which) -> {
                     NegotiateInfo negotiateInfo = negoInfos.get(which);
-                    keyHandle = qCard.getKeyHandle(devHandle, appName, conName, userPIN, negotiateInfo.checkCode, negotiateInfo.flag);
+                    keyHandle = QTF.getKeyHandle(devHandle, appName, conName, userPIN, negotiateInfo.checkCode, negotiateInfo.flag);
                     ToastUtils.showLong("获取密钥句柄成功");
                 })
                 .setCancelable(false)
@@ -368,24 +368,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void freeKeyHandle(View view) {
-        qCard.freeKeyHandle(devHandle, keyHandle);
+        QTF.freeKeyHandle(devHandle, keyHandle);
         ToastUtils.showLong("释放密钥句柄");
     }
 
     byte[] cipher;
 
     public void encrypt(View view) {
-        cipher = qCard.encrypt(devHandle, keyHandle, plain.getBytes(StandardCharsets.UTF_8));
+        cipher = QTF.encrypt(devHandle, keyHandle, plain.getBytes(StandardCharsets.UTF_8));
         ToastUtils.showLong("加密成功");
     }
 
     public void decrypt(View view) {
-        byte[] plain = qCard.decrypt(devHandle, keyHandle, cipher);
+        byte[] plain = QTF.decrypt(devHandle, keyHandle, cipher);
         ToastUtils.showLong(new String(plain, StandardCharsets.UTF_8));
     }
 
     public void getSoftKey(View view) {
-        byte[] softKey = qCard.getSoftKey(devHandle, keyHandle, Integer.parseInt(softKeyLen));
+        byte[] softKey = QTF.getSoftKey(devHandle, keyHandle, Integer.parseInt(softKeyLen));
         ToastUtils.showLong(ConvertUtils.bytes2HexString(softKey));
     }
 
