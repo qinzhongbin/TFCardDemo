@@ -1,6 +1,6 @@
 package com.qasky.tfcarddemo.dto;
 
-public class ServerConsultOnlineBizKeyRequest {
+public class SvrNegoOLBizKeyReq {
 
     private String secretId;
     private String systemId;

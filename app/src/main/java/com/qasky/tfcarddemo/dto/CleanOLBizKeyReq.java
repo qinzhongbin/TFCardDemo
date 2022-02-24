@@ -1,28 +1,19 @@
 package com.qasky.tfcarddemo.dto;
 
-public class CreateOnlineBizKeyRequest {
+public class CleanOLBizKeyReq {
 
-    private int secretSize;
-    private String validityDate;
+    private String secretId;
     private String systemId;
     private String serverId;
-    private long timestamp;
+    private String timestamp;
     private String hmac;
 
-    public int getSecretSize() {
-        return secretSize;
+    public String getSecretId() {
+        return secretId;
     }
 
-    public void setSecretSize(int secretSize) {
-        this.secretSize = secretSize;
-    }
-
-    public String getValidityDate() {
-        return validityDate;
-    }
-
-    public void setValidityDate(String validityDate) {
-        this.validityDate = validityDate;
+    public void setSecretId(String secretId) {
+        this.secretId = secretId;
     }
 
     public String getSystemId() {
@@ -41,11 +32,11 @@ public class CreateOnlineBizKeyRequest {
         this.serverId = serverId;
     }
 
-    public long getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 

@@ -1,6 +1,6 @@
 package com.qasky.tfcarddemo.dto;
 
-public class CreateOnlineBizKeyResponse {
+public class CreateOLBizKeyResp {
 
     private int code;
     private String message;
