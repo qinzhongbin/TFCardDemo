@@ -27,14 +27,14 @@ Java_com_qasky_tfcard_QTF_enumDev(JNIEnv *env, jobject thiz, jstring pkg_name) {
     env->ReleaseStringUTFChars(pkg_name, pkgName);
 
     if (ret > 0) {
-        long handleInfo[1 + ret];
-        handleInfo[0] = reinterpret_cast<long>(devHandles);
+        jlong handleInfo[1 + ret];
+        handleInfo[0] = reinterpret_cast<jlong>(devHandles);
         for (int i = 1; i <= ret; ++i) {
-            handleInfo[i] = reinterpret_cast<long>(devHandles[i - 1]);
+            handleInfo[i] = reinterpret_cast<jlong>(devHandles[i - 1]);
         }
-        jlongArray longArray = env->NewLongArray(1 + ret);
-        env->SetLongArrayRegion(longArray, 0, 1 + ret, (const jlong *) handleInfo);
-        return longArray;
+        jlongArray jlongArray = env->NewLongArray(1 + ret);
+        env->SetLongArrayRegion(jlongArray, 0, 1 + ret, handleInfo);
+        return jlongArray;
     } else {
         return nullptr;
     }
