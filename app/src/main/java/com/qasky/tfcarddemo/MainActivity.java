@@ -132,27 +132,23 @@ public class MainActivity extends AppCompatActivity {
         paramsDialog.show();
     }
 
-    long handles;
     long devHandle;
 
     public void enumDev(View view) {
-        long[] handleInfo = QTF.enumDev(getPackageName());
-        if (handleInfo != null && handleInfo.length > 1) {
-            handles = handleInfo[0];
-            LogUtils.d("handles = 0x" + Long.toHexString(handles));
-
-            String[] devHandles = Arrays.stream(handleInfo).skip(1).mapToObj(Long::toHexString).toArray(String[]::new);
+        long[] devHandles = QTF.enumDev(getPackageName());
+        if (devHandles != null && devHandles.length > 0) {
+            String[] hexHandles = Arrays.stream(devHandles).mapToObj(Long::toHexString).toArray(String[]::new);
 
             new AlertDialog.Builder(this)
                     .setTitle("选择设备")
                     .setCancelable(false)
-                    .setItems(devHandles, (dialog, which) -> devHandle = Long.valueOf(devHandles[which], 16))
+                    .setItems(hexHandles, (dialog, which) -> devHandle = Long.valueOf(hexHandles[which], 16))
                     .create().show();
         }
     }
 
-    public void freeDev(View view) {
-        QTF.freeDev(handles);
+    public void freeDevs(View view) {
+        QTF.freeDevs();
         ToastUtils.showLong("释放设备");
     }
 

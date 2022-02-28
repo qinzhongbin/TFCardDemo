@@ -13,12 +13,14 @@
 #include <SKF.h>
 #include <log.h>
 
+QHANDLES devHandles;
+
 extern "C"
 JNIEXPORT jlongArray JNICALL
 Java_com_qasky_tfcard_QTF_enumDev(JNIEnv *env, jobject thiz, jstring pkg_name) {
     char *pkgName = const_cast<char *>(env->GetStringUTFChars(pkg_name, JNI_FALSE));
     char appPath[128];
-    QHANDLES devHandles = nullptr;
+    devHandles = nullptr;
     snprintf(appPath, 128, "%s%s", "Android/data/", pkgName);
 
     int ret = QCard_EnumStoreHandle(&devHandles, pkgName, appPath);
@@ -27,13 +29,12 @@ Java_com_qasky_tfcard_QTF_enumDev(JNIEnv *env, jobject thiz, jstring pkg_name) {
     env->ReleaseStringUTFChars(pkg_name, pkgName);
 
     if (ret > 0) {
-        jlong handleInfo[1 + ret];
-        handleInfo[0] = reinterpret_cast<jlong>(devHandles);
-        for (int i = 1; i <= ret; ++i) {
-            handleInfo[i] = reinterpret_cast<jlong>(devHandles[i - 1]);
+        jlong handles[ret];
+        for (int i = 0; i < ret; ++i) {
+            handles[i] = reinterpret_cast<jlong>(devHandles[i]);
         }
-        jlongArray jlongArray = env->NewLongArray(1 + ret);
-        env->SetLongArrayRegion(jlongArray, 0, 1 + ret, handleInfo);
+        jlongArray jlongArray = env->NewLongArray(ret);
+        env->SetLongArrayRegion(jlongArray, 0, ret, handles);
         return jlongArray;
     } else {
         return nullptr;
@@ -42,8 +43,8 @@ Java_com_qasky_tfcard_QTF_enumDev(JNIEnv *env, jobject thiz, jstring pkg_name) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_qasky_tfcard_QTF_freeDev(JNIEnv *env, jobject thiz, jlong dev_handles) {
-    QCard_FreeStoreHandle(reinterpret_cast<QHANDLES>(dev_handles));
+Java_com_qasky_tfcard_QTF_freeDevs(JNIEnv *env, jobject thiz) {
+    QCard_FreeStoreHandle(devHandles);
     LOGD("QCard_FreeStoreHandle");
 }
 

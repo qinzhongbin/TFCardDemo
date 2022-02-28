@@ -29,16 +29,16 @@
                 android:layout_height="wrap_content"
                 android:onClick="enumDev"
                 android:text="枚举设备"
-                app:layout_constraintEnd_toStartOf="@id/freeDev"
+                app:layout_constraintEnd_toStartOf="@id/freeDevs"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/freeDev"
+                android:id="@+id/freeDevs"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:onClick="freeDev"
-                android:text="释放设备句柄"
+                android:onClick="freeDevs"
+                android:text="释放设备"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/enumDev"
                 app:layout_constraintTop_toTopOf="@id/enumDev" />
