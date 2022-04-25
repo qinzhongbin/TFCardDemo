@@ -3,14 +3,10 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <android/log.h>
-#include <qcard_type.h>
 #include <qcard.h>
 #include <cstring>
-#include <qalg_sm4.h>
 #include <curl/curl.h>
 #include <iostream>
-#include <skf_type.h>
-#include <SKF.h>
 #include <log.h>
 
 QHANDLES devHandles;

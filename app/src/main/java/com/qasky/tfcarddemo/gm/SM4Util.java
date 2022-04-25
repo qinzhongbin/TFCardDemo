@@ -76,6 +76,7 @@ public class SM4Util {
         return cipher.doFinal(cipherText);
     }
 
+
     public static byte[] encrypt_CBC_Padding(byte[] key, byte[] iv, byte[] data)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException,
             NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException,

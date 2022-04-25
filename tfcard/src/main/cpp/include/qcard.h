@@ -7,7 +7,7 @@
 
 #ifndef QCARD_H
 #define QCARD_H
-#include <qcard_skf.h>
+#include <qcard_type.h>
 #ifdef _WIN32
 #ifndef QCARD_API
 #define QCARD_API __declspec(dllexport)
@@ -836,8 +836,50 @@ QCARD_API int QCard_SM3DigestData(QHANDLE hStoreHandle, char *pcAppName, char *p
 *******************************************************************************/
 //QCARD_API int QCard_SetAppPath(char *packetname);
 
+/*******************************************************************************
+* Function Name  : QCard_VerifyAppPIN
+* Description    : 校验PIN
+* Input          : hStoreHandle    : 安全存储区句柄
+*                : pcAppName       : 应用名称
+*                : pcUserPin       : 用户PIN
+* Output         : ulUserPinRetry  : 用户PIN出错后返回的重试次数
+* Return         : 成功返回0,其它返回错误码
+*******************************************************************************/
+QCARD_API int QCard_VerifyAppPIN(QHANDLE hStoreHandle, char *pcAppName, char *pcUserPin, unsigned long *pulUserPinRetry);
+
+/*******************************************************************************
+* Function Name  : QCard_ExportPublicKey
+* Description    : 导出公钥
+* Input          : hStoreHandle    : 安全存储区句柄
+*                : pcAppName       : 应用名称
+*                : pcContainerName : 容器名称
+*                : ulPublicKeyType : 公钥类型, 1为签名公钥, 0为加密公钥
+*                : pulPublicCertLen :输入时表示pcPublicCert缓存长度
+*                : pcPublicCert     : 值为0时，pulPublicCertLen返回公钥长度
+* OutPut         : pulPublicCertLen :输出时表示pcPublicCert公钥长度
+*                : pcPublicCert     : 公钥文件
+* Return         : 成功返回0,其它返回错误码
+*******************************************************************************/
+QCARD_API int QCard_ExportPublicKey(QHANDLE hStoreHandle, char *pcAppName, char *pcContainerName, unsigned long ulPublicKeyType,
+									unsigned char *pcPublicCert, unsigned long *pulPublicCertLen);
 
 
+/*******************************************************************************
+* Function Name  : QCard_ExportCertificate
+* Description    : 导出数字证书
+* Input          : hStoreHandle    : 安全存储区句柄
+*                : pcAppName       : 应用名称
+*                : pcContainerName : 容器名称
+*                : ulCertType      : 数字证书类型 0:加密证书 1:签名证书 2加密证书
+*                : pcCert          : 数字证书缓存，当为0时获取数字证书长度
+*                : pulCertLen       :数字证书缓存长度
+* OutPut         : pcCert          : 数字证书
+*                : pulCertLen       :数字证书长度
+*                : pulTimeOut       :数字证书过期位, 0 未过期; 1已过期;
+* Return         : 成功返回0,其它返回错误码
+*******************************************************************************/
+QCARD_API int QCard_ExportCertificate(QHANDLE hStoreHandle, char *pcAppName, char *pcContainerName, unsigned long ulCertType,
+									  unsigned char *pcCert,unsigned long *pulCertLen, unsigned long *pulTimeOut);
 
 
 #ifdef  __cplusplus
