@@ -11,6 +11,7 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.LogUtils;
+import com.blankj.utilcode.util.StringUtils;
 import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.material.textfield.TextInputLayout;
@@ -235,14 +236,18 @@ public class MainActivity extends AppCompatActivity {
                         if (restResult.getCode() == 0) {
                             ExtServerConsultInfo data = restResult.getData();
                             String hmac_expect = Base64.toBase64String(SM3Util.hmac(hmacKey, String.join(",", data.toAuthMsgParams()).getBytes(StandardCharsets.UTF_8)));
-                            if (timestamp.equals(data.getTimestamp()) && hmac_expect.equals(data.getHmac())) { // 校验时间戳与hmac
-                                ToastUtils.showLong("CTS密钥协商成功");
-                                String softQkey_encrypted_encoded = data.getSoftQkey();
-                                byte[] softQkey_encrypted = Base64.decode(softQkey_encrypted_encoded);
-                                byte[] softQkey = SM4Util.decrypt_CBC_Padding(decryptKey, iv, softQkey_encrypted);
-                                LogUtils.d("服务端软密钥：0x" + ConvertUtils.bytes2HexString(softQkey)); // 客户端导出软密钥对比是否与服务端一致
-                                negoInfos.add(new NegotiateInfo(data.getFlag().toOriginalOrderJson(), data.getCheckCode()));
+                            if (data.getTimestamp() != null && data.getHmac() != null) {
+                                if (!timestamp.equals(data.getTimestamp()) || !hmac_expect.equals(data.getHmac())) { // 校验时间戳与hmac
+                                    ToastUtils.showLong("协商参数校验错误");
+                                    return;
+                                }
                             }
+                            ToastUtils.showLong("CTS密钥协商成功");
+                            String softQkey_encrypted_encoded = data.getSoftQkey();
+                            byte[] softQkey_encrypted = Base64.decode(softQkey_encrypted_encoded);
+                            byte[] softQkey = SM4Util.decrypt_CBC_Padding(decryptKey, iv, softQkey_encrypted);
+                            LogUtils.d("服务端软密钥：0x" + ConvertUtils.bytes2HexString(softQkey)); // 客户端导出软密钥对比是否与服务端一致
+                            negoInfos.add(new NegotiateInfo(data.getFlag().toOriginalOrderJson(), data.getCheckCode()));
                         } else {
                             ToastUtils.showLong(restResult.getMessage());
                         }
@@ -359,7 +364,6 @@ public class MainActivity extends AppCompatActivity {
                     keyHandle = QTF.getKeyHandle(devHandle, appName, conName, userPIN, negotiateInfo.checkCode, negotiateInfo.flag);
                     ToastUtils.showLong("获取密钥句柄成功");
                 })
-                .setCancelable(false)
                 .create().show();
     }
 
@@ -385,7 +389,31 @@ public class MainActivity extends AppCompatActivity {
         ToastUtils.showLong(ConvertUtils.bytes2HexString(softKey));
     }
 
-    public void test(View view) {
+    public void exportEncCert(View view) {
+        byte[] encCert = QTF.exportCert(devHandle, 0, appName, conName);
+        LogUtils.d(ConvertUtils.bytes2HexString(encCert));
+    }
 
+    public void exportSignCert(View view) {
+        byte[] signCert = QTF.exportCert(devHandle, 1, appName, conName);
+        LogUtils.d(ConvertUtils.bytes2HexString(signCert));
+    }
+
+    public void exportRootCert(View view) {
+        byte[] rootCert = QTF.exportCert(devHandle, 2, appName, conName);
+        LogUtils.d(ConvertUtils.bytes2HexString(rootCert));
+    }
+
+    public void exportEncPubKey(View view) {
+        byte[] encPubKey = QTF.exportPubKey(devHandle, 0, appName, conName);
+        LogUtils.d(ConvertUtils.bytes2HexString(encPubKey));
+    }
+
+    public void exportSignPubKey(View view) {
+        byte[] signPubKey = QTF.exportPubKey(devHandle, 1, appName, conName);
+        LogUtils.d(ConvertUtils.bytes2HexString(signPubKey));
+    }
+
+    public void test(View view) {
     }
 }

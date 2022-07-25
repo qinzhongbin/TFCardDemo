@@ -239,7 +239,6 @@ Java_com_qasky_tfcard_QTF_decrypt(JNIEnv *env, jobject thiz, jlong dev_handle, j
     return jbyteArray_dest;
 }
 
-
 extern "C"
 JNIEXPORT jbyteArray JNICALL
 Java_com_qasky_tfcard_QTF_exportCert(JNIEnv *env, jobject thiz, jlong dev_handle, jint type, jstring app_name, jstring con_name) {
@@ -256,7 +255,6 @@ Java_com_qasky_tfcard_QTF_exportCert(JNIEnv *env, jobject thiz, jlong dev_handle
 
     jbyteArray jbyteArray_cert = env->NewByteArray(certLen);
     env->SetByteArrayRegion(jbyteArray_cert, 0, certLen, reinterpret_cast<const jbyte *>(cert));
-    free(cert);
     env->ReleaseStringUTFChars(app_name, appName);
     env->ReleaseStringUTFChars(con_name, conName);
     return jbyteArray_cert;
@@ -278,7 +276,6 @@ Java_com_qasky_tfcard_QTF_exportPubKey(JNIEnv *env, jobject thiz, jlong dev_hand
 
     jbyteArray jbyteArray_key = env->NewByteArray(keyLen);
     env->SetByteArrayRegion(jbyteArray_key, 0, keyLen, reinterpret_cast<const jbyte *>(key));
-    free(key);
     env->ReleaseStringUTFChars(app_name, appName);
     env->ReleaseStringUTFChars(con_name, conName);
     return jbyteArray_key;

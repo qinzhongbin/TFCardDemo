@@ -204,6 +204,56 @@
                 app:layout_constraintTop_toBottomOf="@id/encrypt" />
 
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/exportEncCert"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="exportEncCert"
+                android:text="导出加密证书"
+                app:layout_constraintEnd_toStartOf="@id/exportSignCert"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/getSoftKey" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/exportSignCert"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="exportSignCert"
+                android:text="导出签名证书"
+                app:layout_constraintStart_toEndOf="@id/exportEncCert"
+                app:layout_constraintEnd_toStartOf="@+id/exportRootCert"
+                app:layout_constraintTop_toTopOf="@id/exportEncCert" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/exportRootCert"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="exportRootCert"
+                android:text="导出根证书"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/exportSignCert"
+                app:layout_constraintTop_toTopOf="@id/exportEncCert" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/exportEncPubKey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="exportEncPubKey"
+                android:text="导出加密公钥"
+                app:layout_constraintEnd_toStartOf="@id/exportSignPubKey"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/exportEncCert" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/exportSignPubKey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="exportSignPubKey"
+                android:text="导出签名公钥"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/exportEncPubKey"
+                app:layout_constraintTop_toTopOf="@id/exportEncPubKey" />
+
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/test"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -211,7 +261,7 @@
                 android:text="test"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/getSoftKey" />
+                app:layout_constraintTop_toBottomOf="@id/exportEncPubKey" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.core.widget.NestedScrollView>

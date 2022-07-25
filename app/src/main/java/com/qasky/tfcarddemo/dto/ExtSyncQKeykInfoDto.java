@@ -11,18 +11,8 @@ import java.io.IOException;
 import lombok.Data;
 
 /**
- * Copyright © 2009 Qasky. All rights reserved.
- * <p>
- *
  * 扩展提供软加密会话密钥,对称密钥协商标志信息回话类
- * @author Long cheng
- * @version 1.0.0 2018/08/12
- * <p>
- * History:
- * (author, date, desc)
- * (long cheng 20180812, 创建文件)
  */
-@Data
 public class ExtSyncQKeykInfoDto {
 
     private static final long serialVersionUID = 1L;
@@ -78,6 +68,90 @@ public class ExtSyncQKeykInfoDto {
      * 同步异常信息提示
      */
     private String errorMsg;
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(String storeId) {
+        this.storeId = storeId;
+    }
+
+    public String getUnitId() {
+        return unitId;
+    }
+
+    public void setUnitId(String unitId) {
+        this.unitId = unitId;
+    }
+
+    public String getBlockId() {
+        return blockId;
+    }
+
+    public void setBlockId(String blockId) {
+        this.blockId = blockId;
+    }
+
+    public int getOffsetIndex() {
+        return offsetIndex;
+    }
+
+    public void setOffsetIndex(int offsetIndex) {
+        this.offsetIndex = offsetIndex;
+    }
+
+    public String getEncodeType() {
+        return encodeType;
+    }
+
+    public void setEncodeType(String encodeType) {
+        this.encodeType = encodeType;
+    }
+
+    public int getKeyLen() {
+        return keyLen;
+    }
+
+    public void setKeyLen(int keyLen) {
+        this.keyLen = keyLen;
+    }
+
+    public int getSoftQkeyLen() {
+        return softQkeyLen;
+    }
+
+    public void setSoftQkeyLen(int softQkeyLen) {
+        this.softQkeyLen = softQkeyLen;
+    }
+
+    public String getEncSoftQkey() {
+        return encSoftQkey;
+    }
+
+    public void setEncSoftQkey(String encSoftQkey) {
+        this.encSoftQkey = encSoftQkey;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
 
     // 转化为原始顺序的json（gson会自动按字母顺序排序）
     public String toOriginalOrderJson() {
