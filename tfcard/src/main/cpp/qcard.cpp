@@ -150,7 +150,6 @@ Java_com_qasky_tfcard_QTF_chargeKey(JNIEnv *env, jobject thiz, jlong dev_handle,
     return !ret;
 }
 
-
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_qasky_tfcard_QTF_getKeyHandle(JNIEnv *env, jobject thiz, jlong dev_handle, jstring app_name, jstring con_name, jstring user_pin, jstring check_code, jstring _flag) {
@@ -172,6 +171,27 @@ Java_com_qasky_tfcard_QTF_getKeyHandle(JNIEnv *env, jobject thiz, jlong dev_hand
     env->ReleaseStringUTFChars(user_pin, userPin);
     env->ReleaseStringUTFChars(check_code, checkCode);
     env->ReleaseStringUTFChars(_flag, flag);
+    return reinterpret_cast<jlong>(keyHandle);
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_qasky_tfcard_QTF_importExternalSessionKey(JNIEnv *env, jobject thiz, jlong dev_handle, jbyteArray _key) {
+    long keyLen = env->GetArrayLength(_key);
+    jbyte *jbp_key = env->GetByteArrayElements(_key, JNI_FALSE);
+    auto *key = (unsigned char *) jbp_key;
+
+    QCard_BLOCKCIPHERPARAM KeyParam;
+    KEYHANDLE keyHandle = nullptr;
+
+    memset(&KeyParam, 0, sizeof(KeyParam));
+    KeyParam.PaddingType = 1;
+    KeyParam.IVLen = 16;
+    int ret = QCard_ExternalKeyInit(reinterpret_cast<QHANDLE>(dev_handle), key, keyLen, SGD_SMS4_CBC, KeyParam, &keyHandle);
+    LOGD("QCard_ExternalKeyInit ret = 0x%08x keyHandle = %p", ret, keyHandle);
+
+    env->ReleaseByteArrayElements(_key, jbp_key, JNI_FALSE);
+
     return reinterpret_cast<jlong>(keyHandle);
 }
 
@@ -327,3 +347,4 @@ Java_com_qasky_tfcard_QTF_negoOLBizKey(JNIEnv *env, jobject thiz, jstring _host,
         return obj_NegotiateInfo;
     }
 }
+

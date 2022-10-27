@@ -415,5 +415,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void test(View view) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long[] devHandles = QTF.enumDev(getPackageName());
+                if (devHandles != null && devHandles.length > 0) {
+                    long devHandle = devHandles[0];
+                    byte[] key = "1234567890123456".getBytes(StandardCharsets.UTF_8);
+                    long keyHandle = QTF.importExternalSessionKey(devHandle, key);
+                    byte[] plain = "data to enc".getBytes(StandardCharsets.UTF_8);
+                    byte[] cipher = QTF.encrypt(devHandle, keyHandle, plain);
+                    byte[] result = QTF.decrypt(devHandle, keyHandle, cipher);
+                    System.out.println("result = " + new String(result, StandardCharsets.UTF_8));
+                    QTF.freeKeyHandle(devHandle, keyHandle);
+                    QTF.freeDevs();
+                }
+            }
+        }).start();
     }
 }

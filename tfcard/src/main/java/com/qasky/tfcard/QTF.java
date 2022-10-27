@@ -112,6 +112,14 @@ public class QTF {
     public native long getKeyHandle(long devHandle, String appName, String conName, String userPIN, String checkCode, String flag);
 
     /**
+     * 导入外部会话密钥
+     * @param devHandle 设备句柄
+     * @param _key      外部会话密钥
+     * @return          密钥句柄
+     */
+    public native long importExternalSessionKey(long devHandle, byte[] _key);
+
+    /**
      * 释放密钥句柄
      *
      * @param devHandle 设备句柄
