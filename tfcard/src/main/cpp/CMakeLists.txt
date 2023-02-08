@@ -22,5 +22,7 @@ target_link_libraries(QTF
         curl
         crypto
         SdCryptoStor
+        uv
+        event-2.1
         qtf3302
         log)

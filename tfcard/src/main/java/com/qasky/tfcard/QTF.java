@@ -127,6 +127,8 @@ public class QTF {
      */
     public native void freeKeyHandle(long devHandle, long keyHandle);
 
+    public native long negoOLKey(long devHandle);
+
     /**
      * 加密
      *

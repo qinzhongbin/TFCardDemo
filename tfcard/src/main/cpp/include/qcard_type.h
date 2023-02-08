@@ -204,6 +204,9 @@ typedef void  * QHANDLE;
 typedef void  * KEYHANDLE;
 typedef void  * EVENTHANDLE;
 
+/* 硬密钥参数句柄 */
+typedef void* DEVQKEYPARAM;
+
 /* 容器证书类型 */
 #define SKF_CONTAINER_ENC   0 /* 加密证书 */
 #define SKF_CONTAINER_SIGN  1 /* 签名证书 */
@@ -284,5 +287,13 @@ typedef enum{
     QLOG_DEBUG,
     QLOG_TRACE
 }QCard_LogLevel;
+
+
+/* 安全通道通信协议类型 */
+typedef enum
+{
+	PROTOCOL_TYPE_HTTPS = 0,
+	PROTOCOL_TYPE_TCP
+}QCARD_PROTOCOL_TYPE_ENUM;
 
 #endif  //QCARD_TYPE_H

@@ -29,3 +29,19 @@ inline char *ByteArrayToHexStr(unsigned char *src, int srcLen) {
     sprintf(hexStr, "%s%s", "0x", dest);
     return hexStr;
 }
+
+inline int char_array_cmp(char *s1, int l1, char *s2, int l2)
+{
+    int lmin = l1>l2? l2:l1; //较小长度者。
+    int i;
+
+    for(i = 0; i < lmin; i ++)
+        if(s1[i] > s2[i]) return 1;
+        else if(s1[i] < s2[i]) return -1;
+
+    //运行到这里，表示所有已判断元素均相等。
+    if(l1 == l2) return 0;
+    if(l1 > l2) return 1;
+
+    return -1;//l1 < l2的情况。
+}

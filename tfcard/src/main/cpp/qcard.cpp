@@ -348,3 +348,145 @@ Java_com_qasky_tfcard_QTF_negoOLBizKey(JNIEnv *env, jobject thiz, jstring _host,
     }
 }
 
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_qasky_tfcard_QTF_negoOLKey(JNIEnv *env, jobject thiz, jlong dev_handle) {
+    auto devHandle = reinterpret_cast<QHANDLE>(dev_handle);
+
+    char appName[] = "QSKCTS";
+    char conName[] = "QSKCTS";
+    char pin[] = "12222222";
+
+    char qccsId[] = "WT-QRMS100-20201116";
+    char id[] = "WT-QKMS100_001";
+    char visitKeyBase64[] = "JLz3wNv1g8cTbiOBMaE+xl+lEzvqeqYKghYk+rJZxAa8c+Aq8VCeMxi7u0a7vaHVWOjuePeXoM7JFEeAZy64xA==";
+    char protectKey[] = "123456";
+    char host[] = "112.27.97.202:18895";
+
+    char linkId[64] = {0};
+    char keyId[64] = {0};
+    unsigned char flagChkV[16] = {0};
+    char flag[512] = {0};
+
+    void *secTunnelHandle;
+
+    unsigned long keyLen = 16;
+    unsigned int cipherQKeyLen = (keyLen / 16) * 272;
+    auto *cipherQKey = (unsigned char *) malloc(cipherQKeyLen);
+    memset(cipherQKey, 0, cipherQKeyLen);
+
+    int offerSoftKey = 0;
+
+    // 服务端 创建安全通道，代理协商密钥
+    int ret = QCard_SetServerAuthorizeKey(visitKeyBase64, protectKey);
+    LOGD("QCard_SetServerAuthorizeKey ret = %08x", ret);
+    void *arg = nullptr;
+    ret = QCard_CreateSecTunnel(PROTOCOL_TYPE_TCP, host, qccsId, id, arg, &secTunnelHandle);
+    LOGD("QCard_CreateSecTunnel ret = %08x secTunnelHandle = %p", ret, secTunnelHandle);
+
+    char devId[64] = {0};
+    ret = QCard_GetStoreId(devHandle, devId);
+    LOGD("QCard_GetStoreId ret = %08x devId = %s", ret, devId);
+
+    ret = QCard_GetLinkId(secTunnelHandle, devId, qccsId, linkId);
+    LOGD("QCard_GetLinkId ret = %08x linkId = %s", ret, linkId);
+
+    char systemId[32] = {0};
+    ret = QCard_GetSysTemId(devHandle, appName, conName, systemId);
+    LOGD("QCard_GetSysTemId ret = %08x systemId = %s", ret, systemId);
+
+    ret = QCard_ServerProxyRequestQkey(secTunnelHandle, devId, linkId, systemId, keyLen, keyId, flagChkV, flag, &offerSoftKey, cipherQKey, &cipherQKeyLen);
+    LOGD("QCard_ServerProxyRequestQkey ret = 0x%08x", ret);
+    LOGD("QCard_ServerProxyRequestQkey devId = %s", devId);
+    LOGD("QCard_ServerProxyRequestQkey linkId = %s", linkId);
+    LOGD("QCard_ServerProxyRequestQkey systemId = %s", systemId);
+    LOGD("QCard_ServerProxyRequestQkey keyLen = %lu", keyLen);
+    LOGD("QCard_ServerProxyRequestQkey keyId = %s", keyId);
+    LOGD("QCard_ServerProxyRequestQkey flagChkV = %s", ByteArrayToHexStr(flagChkV, 16));
+    LOGD("QCard_ServerProxyRequestQkey flag = %s", flag);
+    LOGD("QCard_ServerProxyRequestQkey offerSoftKey = %d", offerSoftKey);
+    LOGD("QCard_ServerProxyRequestQkey cipherQKey = %s", ByteArrayToHexStr(cipherQKey, cipherQKeyLen));
+    LOGD("QCard_ServerProxyRequestQkey cipherQKeyLen = %d", cipherQKeyLen);
+
+    unsigned int qkeyReadLen = 256;
+    auto *qkeyRead = (unsigned char *) calloc(1, qkeyReadLen);
+    ret = QCard_ReadQKey(secTunnelHandle, keyId, qkeyRead, &qkeyReadLen);
+    LOGD("QCard_ReadQKey ret = %08x qkeyReadLen = %d qkeyRead = %s", ret, qkeyReadLen, ByteArrayToHexStr(qkeyRead, qkeyReadLen));
+
+    QCard_DestroySecTunnel(secTunnelHandle);
+
+    // 客户端 根据协商参数获取密钥句柄
+    KEYHANDLE keyHandle = nullptr;
+    unsigned int plainKeyLen = 16;
+
+    if (1 == offerSoftKey) {
+        unsigned int qkeyLen = plainKeyLen;
+        auto *qkey = static_cast<unsigned char *>(malloc(qkeyLen));
+
+        ret = QCard_ClientGetQkey(devHandle, qccsId, systemId, pin, flagChkV, flag, offerSoftKey, cipherQKey, cipherQKeyLen, qkey, &qkeyLen);
+        LOGD("QCard_ClientGetQkey ret = %08x qkeyLen = %d qkey = %s", ret, qkeyLen, ByteArrayToHexStr(qkey, qkeyLen));
+
+        ret = char_array_cmp(reinterpret_cast<char *>(qkeyRead), (int)qkeyReadLen, reinterpret_cast<char *>(qkey), (int)qkeyLen);
+        LOGD("compare key ret = %d", ret);
+
+        QCard_BLOCKCIPHERPARAM KeyParam;
+        memset(&KeyParam, 0, sizeof(KeyParam));
+        KeyParam.PaddingType = 1;
+        KeyParam.IVLen = 16;
+
+        ret = QCard_ExternalKeyInit(devHandle, qkey, qkeyLen, SGD_SMS4_CBC, KeyParam, &keyHandle);
+        LOGD("QCard_ExternalKeyInit ret = %08x keyHandle = %p", ret, keyHandle);
+
+        unsigned long tryTimes = 0;
+        ret = QCard_KeyToConVerifyPIN(devHandle, keyHandle, appName, conName, pin, &tryTimes);
+        LOGD("QCard_KeyToConVerifyPIN ret = %08x tryTimes = %lu", ret, tryTimes);
+
+//        QCard_KeyFinal(devHandle, keyHandle);
+//        LOGD("QCard_KeyFinal");
+    } else {
+        DEVQKEYPARAM devKeyParam = nullptr;
+        unsigned int qKeyNum = 0;
+
+        ret = QCard_ClientGetDeviceQkey(devHandle, qccsId, systemId, pin, flagChkV, flag, offerSoftKey, cipherQKey, cipherQKeyLen, plainKeyLen, &devKeyParam, &qKeyNum);
+        LOGD("QCard_ClientGetDeviceQkey ret = %08x", ret);
+
+        QCard_BLOCKCIPHERPARAM KeyParam;
+        memset(&KeyParam, 0, sizeof(KeyParam));
+        KeyParam.PaddingType = 1;
+        KeyParam.IVLen = 16;
+        auto *keyHandles = (KEYHANDLE *) malloc(qKeyNum * sizeof(KEYHANDLE));
+        memset(keyHandles, 0, qKeyNum * sizeof(KEYHANDLE));
+
+        ret = QCard_deviceQKeyHandlesInit(devHandle, devKeyParam, 0, qKeyNum, SGD_SMS4_CBC, KeyParam, keyHandles);
+        keyHandle = keyHandles[0];
+        LOGD("QCard_deviceQKeyHandlesInit ret = %08x keyHandle = %p", ret, keyHandle);
+
+//        QCard_DestroyDevQkeyParam(devKeyParam);
+//        LOGD("QCard_DestroyDevQkeyParam ret = %08x", ret);
+//
+//        QCard_DestroyDeviceKeyHandles(devHandle, keyHandles, qKeyNum);
+//        LOGD("QCard_DestroyDeviceKeyHandles ret = %08x", ret);
+    }
+
+    unsigned long plainLen = 16;
+    unsigned char plain[] = "1234567890123456";
+
+    unsigned long cipherLen = plainLen + 16;
+    unsigned char cipher[cipherLen];
+    memset(cipher, 0, cipherLen);
+
+    ret = QCard_Encrypt(devHandle, keyHandle, plain, plainLen, cipher, &cipherLen);
+    LOGD("QCard_Encrypt ret = %08x cipherLen = %lu cipher = %s", ret, cipherLen, ByteArrayToHexStr(cipher, cipherLen));
+
+    unsigned long destLen = cipherLen;
+    unsigned char dest[destLen];
+    memset(dest, 0, sizeof(dest));
+
+    ret = QCard_Decrypt(devHandle, keyHandle, cipher, cipherLen, dest, &destLen);
+    LOGD("QCard_Decrypt ret = 0x%08x destLen = %lu dest = %s", ret, destLen, ByteArrayToHexStr(dest, destLen));
+
+    ret = char_array_cmp(reinterpret_cast<char *>(plain), (int)plainLen, reinterpret_cast<char *>(dest), (int)destLen);
+    LOGD("compare enc and dec ret = %d", ret);
+
+    return reinterpret_cast<jlong>(keyHandle);
+}

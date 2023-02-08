@@ -354,6 +354,8 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+
+
     long keyHandle;
 
     public void getKeyHandle(View view) {
@@ -370,6 +372,15 @@ public class MainActivity extends AppCompatActivity {
     public void freeKeyHandle(View view) {
         QTF.freeKeyHandle(devHandle, keyHandle);
         ToastUtils.showLong("释放密钥句柄");
+    }
+
+    public void negoOLKey(View view) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                QTF.negoOLKey(devHandle);
+            }
+        }).start();
     }
 
     byte[] cipher;
@@ -433,4 +444,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
+
+
 }
