@@ -39,4 +39,5 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
+    namespace 'com.qasky.tfcard'
 }
