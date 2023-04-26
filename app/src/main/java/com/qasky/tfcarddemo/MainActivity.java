@@ -1,5 +1,6 @@
 package com.qasky.tfcarddemo;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -138,12 +139,10 @@ public class MainActivity extends AppCompatActivity {
     public void enumDev(View view) {
         long[] devHandles = QTF.enumDev(getPackageName());
         if (devHandles != null && devHandles.length > 0) {
-            String[] hexHandles = Arrays.stream(devHandles).mapToObj(Long::toHexString).toArray(String[]::new);
-
             new AlertDialog.Builder(this)
                     .setTitle("选择设备")
                     .setCancelable(false)
-                    .setItems(hexHandles, (dialog, which) -> devHandle = Long.valueOf(hexHandles[which], 16))
+                    .setItems(Arrays.stream(devHandles).mapToObj(String::valueOf).toArray(String[]::new), (dialog, which) -> devHandle = devHandles[which])
                     .create().show();
         }
     }
