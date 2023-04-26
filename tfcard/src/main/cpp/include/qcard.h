@@ -29,6 +29,7 @@ extern "C" {
 * Return         : 成功返回安全存储区个数, 其它返回错误值
 *******************************************************************************/
 QCARD_API int QCard_EnumStoreHandle(QHANDLES *phStoreHandles,char *packetname,char *fixpacketname);
+QCARD_API int QCard_Android_EnumStoreHandle(QHANDLES *phStoreHandles,char *packetname,char *fixpacketname);
 
 /*******************************************************************************
 * Function Name  : QCard_EnumSpecifiedTypeStoreHandle
