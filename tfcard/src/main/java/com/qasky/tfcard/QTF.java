@@ -188,4 +188,6 @@ public class QTF {
      * @return 协商信息
      */
     public native NegotiateInfo negoOLBizKey(String host, String deviceId, String systemId, String secretId, String serverId, String visitKeyBase64, String protectKey);
+
+    public native void test();
 }

@@ -8,6 +8,8 @@
 #include <curl/curl.h>
 #include <iostream>
 #include <log.h>
+#include <skf.h>
+#include "SdCryptoStor.h"
 
 QHANDLES devHandles;
 QHANDLE devHandle;
@@ -117,7 +119,7 @@ Java_com_qasky_tfcard_QTF_queryKeyLength(JNIEnv *env, jobject thiz, jstring devi
     env->ReleaseStringUTFChars(device_id, deviceId);
     env->ReleaseStringUTFChars(app_name, appName);
     env->ReleaseStringUTFChars(con_name, conName);
-    return (int)(totalLen - usedLen);
+    return (int) (totalLen - usedLen);
 }
 
 extern "C"
@@ -479,3 +481,535 @@ Java_com_qasky_tfcard_QTF_negoOLBizKey(JNIEnv *env, jobject thiz, jstring _host,
 //
 //    return reinterpret_cast<jlong>(keyHandle);
 //}
+
+
+char *g_szDevName;
+void *g_hdev = 0;
+void *g_hKey = NULL;
+void *g_hKey1 = NULL;
+
+
+#define DevAuth_PIN "C*CORE SYS @ SZ "
+
+BYTE xData[] = {0x09, 0xf9, 0xdf, 0x31, 0x1e, 0x54, 0x21, 0xa1,
+                0x50, 0xdd, 0x7d, 0x16, 0x1e, 0x4b, 0xc5, 0xc6,
+                0x72, 0x17, 0x9f, 0xad, 0x18, 0x33, 0xfc, 0x07,
+                0x6b, 0xb0, 0x8f, 0xf3, 0x56, 0xf3, 0x50, 0x20};
+
+BYTE yData[] = {0xcc, 0xea, 0x49, 0x0c, 0xe2, 0x67, 0x75, 0xa5,
+                0x2d, 0xc6, 0xea, 0x71, 0x8c, 0xc1, 0xaa, 0x60,
+                0x0a, 0xed, 0x05, 0xfb, 0xf3, 0x5e, 0x08, 0x4a,
+                0x66, 0x32, 0xf6, 0x07, 0x2d, 0xa9, 0xad, 0x13};
+
+BYTE pData[] = {0x39, 0x45, 0x20, 0x8f, 0x7b, 0x21, 0x44, 0xb1,
+                0x3f, 0x36, 0xe3, 0x8a, 0xc6, 0xd3, 0x9f, 0x95,
+                0x88, 0x93, 0x93, 0x69, 0x28, 0x60, 0xb5, 0x1a,
+                0x42, 0xfb, 0x81, 0xef, 0x4d, 0xf7, 0xc5, 0xb8};
+
+
+
+//#ifdef  __cplusplus
+//extern "C" {
+//#endif
+//extern void sd_CommInit(PUCHAR pucSendHeader, PUCHAR pucRecvHeader, PCHAR pszFileName);
+//
+//extern int sd_SetPackageName(const char *szPackageName);
+//
+//extern int sd_EnumDevice(char **szDevNames, DWORD *pulLen);
+//
+//#ifdef  __cplusplus
+//}
+//#endif
+
+
+void getSzDevName() {
+    unsigned int i = 0;
+    unsigned int ret = 0;
+    unsigned int start = 0;
+    u32 pulSize = 0;
+    char *szNameList = NULL;
+    char SzDevName[128] = {0};
+
+    ret = SKF_EnumDev(1, szNameList, &pulSize);
+    if (ret) {
+        LOGD("%s %d 0x%x\n", __FUNCTION__, __LINE__, ret);
+        return;
+    }
+
+    if (pulSize > 2) {
+        szNameList = (char *) malloc(pulSize);
+        if (NULL == szNameList) {
+            LOGD("%s %d 0x%x\n", __FUNCTION__, __LINE__, ret);
+            return;
+        }
+        memset(szNameList, 0, pulSize);
+    } else {
+        LOGD("%s %d 0x%x\n", __FUNCTION__, __LINE__, ret);
+        return;
+    }
+
+    ret = SKF_EnumDev(1, szNameList, &pulSize);
+    if (ret) {
+        free(szNameList);
+        LOGD("%s %d 0x%x\n", __FUNCTION__, __LINE__, ret);
+        return;
+    }
+
+
+    for (i = 1; i <= pulSize; i++) {
+
+        if (0 == szNameList[i - 1]) {
+            if (start) {
+                sprintf(SzDevName, "%s", &szNameList[start - 1]);
+                //LOGD("|%s|\n", SzDevName);
+
+                if (NULL == g_szDevName) {
+                    g_szDevName = static_cast<char *>(malloc(strlen(SzDevName) + 1));
+                    if (NULL == g_szDevName) {
+                        free(szNameList);
+                        LOGD("%s %d 0x%x\n", __FUNCTION__, __LINE__, ret);
+                        return;
+                    }
+                    memcpy(g_szDevName, SzDevName, strlen(SzDevName));
+                    g_szDevName[strlen(SzDevName)] = '\0';
+                }
+                start = 0;
+            }
+        } else {
+            if (0 == start) {
+                start = i;
+            }
+        }
+
+    }
+
+
+    free(szNameList);
+    LOGD("%s %d 0x%x\n", __FUNCTION__, __LINE__, ret);
+    return;
+}
+
+int ImportECCKeyPair(void *hdev, void *hcon) {
+
+    int xlen = 32;
+    int ylen = 32;
+    int dlen = 32;
+    unsigned int ret = 0;
+    u32 len = 128;
+
+    HANDLE hKey;
+    ECCPUBLICKEYBLOB pub;
+    BLOCKCIPHERPARAM bp;
+
+    uint8_t encryptkey[1024] = {0};
+    unsigned char keypair[96] = {0};
+
+    uint8_t key[16] = {0x47, 0x50, 0x42, 0x02, 0x20, 0x3F, 0xE1, 0x92, 0x66, 0x2A, 0xCB, 0xD2, 0x9D, 0, 0, 0};
+
+    struct SKF_ENVELOPEDKEYBLOB *env = (struct SKF_ENVELOPEDKEYBLOB *) encryptkey;
+
+
+    bp.PaddingType = 0;
+    bp.IVLen = 0;
+    bp.FeedBitLen = 0;
+
+    memset(encryptkey, 0, 1024);
+
+    //sm2_keygen(keypair, &xlen, &keypair[32], &ylen, &keypair[64], &dlen);
+    memcpy(keypair, xData, 32);
+    memcpy(keypair + 32, yData, 32);
+    memcpy(keypair + 64, pData, 32);
+
+    env->Version = 1;
+    env->ulBits = 256;
+    env->PubKey.BitLen = 256;
+    env->ulSymmAlgID = SGD_SMS4_ECB;
+    memcpy(env->PubKey.XCoordinate + 32, keypair, 32);
+    memcpy(env->PubKey.YCoordinate + 32, keypair + 32, 32);
+
+    len = 1024;
+    ret = SKF_ExportPublicKey(hcon, 0, encryptkey, &len);
+    if (ret == 0)
+        return 0;
+
+    len = sizeof(ECCPUBLICKEYBLOB);
+    ret = SKF_ExportPublicKey(hcon, 1, (uint8_t *) &pub, &len);
+    if (ret) {
+        if (ret == SAR_KEYNOTFOUNTERR) {
+            ret = SKF_GenECCKeyPair(hcon, SGD_SM2_1, &pub);
+            if (ret) {
+                LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+                return ret;
+            }
+        } else {
+            LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+            return ret;
+        }
+    }
+
+    ret = SKF_ExtECCEncrypt(hdev, &pub, key, 16, &env->ECCCipherBlob);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        return ret;
+    }
+    ret = SKF_SetSymmKey(hdev, key, SGD_SMS4_ECB, &hKey);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        return ret;
+    }
+
+    ret = SKF_EncryptInit(hKey, bp);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        return ret;
+    }
+
+    len = 64;
+    ret = SKF_Encrypt(hKey, keypair + 64, 32, env->cbEncryptedPriKey + 32, &len);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        return ret;
+    }
+
+    ret = SKF_ImportECCKeyPair(hcon, env);
+    LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+
+    return ret;
+}
+
+
+int DoDevAuth(char *DevAuthPIN) {
+    unsigned int l = 32;
+    unsigned int ret = 0;
+    uint8_t rand[16] = {0};
+    uint8_t authdata[32] = {0};
+    char ss[12];
+    char *szAlgo = NULL;
+    DEVINFO info;
+
+    ret = SKF_GetDevInfo(g_hdev, &info);
+    if (ret) {
+        return ret;
+    }
+    switch (info.DevAuthAlgId) {
+        case SGD_SM1_ECB:
+            szAlgo = "SGD_SM1_ECB";
+            break;
+        case SGD_SMS4_ECB:
+            szAlgo = "SGD_SMS4_ECB";
+            break;
+        default:
+            sprintf(ss, "0x%x", info.DevAuthAlgId);
+            szAlgo = ss;
+    }
+    LOGD("%x %x %x\n", info.DevAuthAlgId, SGD_SM1_ECB, SGD_SMS4_ECB);
+    if (info.DevAuthAlgId == SGD_SM1_ECB || info.DevAuthAlgId == SGD_SMS4_ECB) {
+        HANDLE hKey;
+        BLOCKCIPHERPARAM bp;
+
+        bp.IVLen = 0;
+        bp.PaddingType = NO_PADDING;
+        bp.FeedBitLen = 0;
+
+        ret = SKF_GenRandom(g_hdev, rand, 8);
+        if (ret) {
+            return ret;
+        }
+
+        ret = SKF_SetSymmKey(g_hdev, (uint8_t *) DevAuthPIN, info.DevAuthAlgId, &hKey);
+        if (ret) {
+            SKF_CloseHandle(hKey);
+            return ret;
+        }
+
+        ret = SKF_EncryptInit(hKey, bp);
+        if (ret) {
+            SKF_CloseHandle(hKey);
+            return ret;
+        }
+
+        ret = SKF_Encrypt(hKey, rand, 16, authdata, &l);
+        SKF_CloseHandle(hKey);
+        if (ret) {
+            return ret;
+        }
+    } else {
+        return 1;
+    }
+    ret = SKF_DevAuth(g_hdev, authdata, l);
+    return ret;
+}
+
+int create_app() {
+    int trytimes = 0;
+    unsigned char tdata[513] = {0};
+    unsigned int tdataLen = 512;
+    unsigned char digest1[32] = {0};
+    unsigned char digest2[32] = {0};
+    unsigned char digest3[32] = {0};
+    unsigned long ret = 0, len = 0;
+    void *sk_dev;
+    void *happ;
+    void *hcon;
+    char pcPin[] = "20201818";
+    unsigned int i;
+    char szDevName[128] = {0};
+    void *happ1;
+
+    ECCPUBLICKEYBLOB tmpECCPUBLICKEYBLOB;
+
+    uint8_t data1[2048] = {0};
+    ECCCIPHERBLOB *p_ECCWrappedKey = (ECCCIPHERBLOB *) data1;
+    ECCPUBLICKEYBLOB ECCEncryptPubKeyBlob;
+    unsigned int ECCEncryptPubKeyBlob_len = sizeof(ECCPUBLICKEYBLOB);
+
+    //删除应用
+    ret = SKF_DeleteApplication(g_hdev, "test");
+    if (ret && (ret != SAR_APPLICATION_NOT_EXISTS && ret != SAR_FILE_NOT_EXIST)) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    DoDevAuth(DevAuth_PIN);
+
+    //创建应用
+    ret = SKF_CreateApplication(g_hdev, "test", "1234567812345678",
+                                6, "12222222", 6,
+                                SECURE_ANYONE_ACCOUNT, &happ);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    //校验用户pin码
+    ret = SKF_VerifyPIN(happ, USER_TYPE, "12222222", reinterpret_cast<u32 *>(&trytimes));
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+
+    //创建容器
+    ret = SKF_CreateContainer(happ, "test", &hcon);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    //生成签名密钥对
+    ret = SKF_GenECCKeyPair(hcon, SGD_SM2_1, &tmpECCPUBLICKEYBLOB);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    //导入加密密钥对
+    ret = ImportECCKeyPair(g_hdev, hcon);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+
+    ret = SKF_ExportPublicKey(hcon, 0, (uint8_t *) &ECCEncryptPubKeyBlob, &ECCEncryptPubKeyBlob_len);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+
+#if 0
+    ret = SKF_ECCExportSessionKey(hcon, SGD_SM1_ECB, &ECCEncryptPubKeyBlob, p_ECCWrappedKey, &hsess);
+    if(ret)
+    {
+        LOGD("%s %d ret %x\n", __FUNCTION__,__LINE__,ret);
+        goto end;
+    }
+    SKF_CloseHandle(hsess);
+#else
+
+    ret = SKF_ExtECCEncrypt(g_hdev, &ECCEncryptPubKeyBlob, (u8 *) "1234567812345678", 16, p_ECCWrappedKey);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        return ret;
+    }
+
+#endif
+
+    ret = SKF_CUSTOM_ImportSymmKey(hcon, (BYTE *) p_ECCWrappedKey, sizeof(ECCCIPHERBLOB) + p_ECCWrappedKey->CipherLen - 1);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        return ret;
+    }
+
+    end:
+
+    if (hcon) {
+        SKF_CloseContainer(hcon);
+    }
+
+    if (happ) {
+        SKF_CloseApplication(happ);
+    }
+
+    return ret;
+}
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_qasky_tfcard_QTF_test(JNIEnv *env, jobject thiz) {
+    unsigned long ret = 0, len = 0;
+    void *sk_dev;
+    void *hcon;
+    char pcPin[] = "20201818";
+    char szDevName[128] = {0};
+    void *happ;
+    unsigned char key[17] = "1122334455667788";
+    unsigned long ulEncryptedLen = 4096;
+    unsigned char in[4096] = {0};
+    unsigned char outenc[4096] = {0};
+    unsigned char outdec[4096] = {0};
+    unsigned char plain[] = "hello world";
+    int trytimes = 0;
+    BLOCKCIPHERPARAM bp;
+//        getSzDevName();
+
+    sd_SetPackageName("com.qasky.tfcarddemo");
+    V_SetAppPath("Android/data/com.qasky.tfcarddemo");
+
+//    char *bufname = NULL;
+    unsigned int ullength = 0;
+
+    sd_EnumDevice(&g_szDevName, reinterpret_cast<DWORD *>(&ullength));
+    LOGD("bufname = %s", g_szDevName);
+//    return;
+
+    if (NULL == g_szDevName) {
+        LOGD("getSzDevName failed\n");
+        goto end;
+    }
+
+    ret = SKF_ConnectDev(g_szDevName, &g_hdev);
+    LOGD("SKF_ConnectDev @ret = 0x%x @g_szDevName=%s\n", ret, g_szDevName);
+    if (SAR_OK != ret) {
+        goto end;
+    }
+
+    ret = DoDevAuth(DevAuth_PIN);
+    LOGD("DoDevAuth @ret = 0x%x @g_szDevName=%s\n", ret, g_szDevName);
+    if (SAR_OK != ret) {
+        goto end;
+    }
+//    ret = SKF_DeleteApplication(g_hdev, "test");
+    ret = SKF_OpenApplication(g_hdev, "test", &happ);
+    if (ret) {
+        ret = create_app();
+        if (ret) {
+            LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+            goto end;
+        }
+
+        ret = SKF_OpenApplication(g_hdev, "test", &happ);
+        if (ret) {
+            LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+            goto end;
+        }
+    }
+
+    ret = SKF_OpenContainer(happ, "test", &hcon);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    ret = SKF_SetSymmKey(g_hdev, (u8 *) "1234567812345678", SGD_SMS4_CBC, &g_hKey);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    memset(&bp, 0x0, sizeof(bp));
+
+    bp.IVLen = 0;
+    bp.PaddingType = 0;
+    bp.FeedBitLen = 0;
+
+    //初始化解密句柄
+    ret = SKF_EncryptInit(g_hKey, bp);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    ulEncryptedLen = 4096;
+    ret = SKF_Encrypt(g_hKey, key, 16, outenc, reinterpret_cast<u32 *>(&ulEncryptedLen));
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    //校验用户pin码
+    ret = SKF_VerifyPIN(happ, USER_TYPE, "12222222", reinterpret_cast<u32 *>(&trytimes));
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    ret = SKF_CUSTOM_ImportSessionKey(hcon, SGD_SMS4_CBC, SGD_SMS4_CBC, outenc, 16, &g_hKey1);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+    SKF_CloseHandle(g_hKey);
+
+
+    bp.PaddingType = 1;
+    ret = SKF_EncryptInit(g_hKey1, bp);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+
+    ret = SKF_Encrypt(g_hKey1, plain, strlen(reinterpret_cast<const char *const>(plain)), outenc, reinterpret_cast<u32 *>(&ulEncryptedLen));
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
+    {
+        int z;
+        unsigned char *p;
+        p = (unsigned char *) outenc;
+        LOGD("\n%s %d \n", __FUNCTION__, __LINE__);
+        for (z = 1; z <= ulEncryptedLen; z++) {
+
+            LOGD("%02x ", p[z - 1]);
+            if (z % 16 == 0) {
+                LOGD("\n");
+            }
+        }
+        LOGD("\n");
+    }
+
+    SKF_CloseHandle(g_hKey1);
+
+    end:
+
+
+    if (hcon) {
+        SKF_CloseContainer(hcon);
+    }
+
+    if (happ) {
+        SKF_CloseApplication(happ);
+    }
+
+    if (g_hdev) {
+        SKF_DisConnectDev(g_hdev);
+    }
+#ifdef _WIN32
+    system("pause");
+#endif
+}

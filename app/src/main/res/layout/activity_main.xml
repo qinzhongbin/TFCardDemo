@@ -37,5 +37,11 @@
             android:layout_height="wrap_content"
             android:onClick="CTSNegoOLBizQKey"
             android:text="CTS协商在线业务密钥" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:layout_width="match_parent"
+            android:text="TEST"
+            android:onClick="TEST"
+            android:layout_height="wrap_content" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.core.widget.NestedScrollView>
