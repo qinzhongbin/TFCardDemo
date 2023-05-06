@@ -10,137 +10,126 @@
 #include <log.h>
 
 QHANDLES devHandles;
+QHANDLE devHandle;
 
 extern "C"
-JNIEXPORT jlongArray JNICALL
-Java_com_qasky_tfcard_QTF_enumDev(JNIEnv *env, jobject thiz, jstring pkg_name) {
+JNIEXPORT jboolean JNICALL
+Java_com_qasky_tfcard_QTF_enumDevice(JNIEnv *env, jobject thiz, jstring pkg_name) {
     char *pkgName = const_cast<char *>(env->GetStringUTFChars(pkg_name, JNI_FALSE));
     char appPath[128];
-    devHandles = nullptr;
     snprintf(appPath, 128, "%s%s", "Android/data/", pkgName);
 
-    int ret = QCard_Android_EnumStoreHandle(&devHandles, pkgName, appPath);
-    LOGD("QCard_EnumStoreHandle ret = 0x%08x", ret);
+    devHandles = nullptr;
+    int ret = QCard_EnumStoreHandle(&devHandles, pkgName, appPath);
+    LOGD("QCard_EnumStoreHandle ret = %X devHandles = %p", ret, devHandles);
 
     env->ReleaseStringUTFChars(pkg_name, pkgName);
 
     if (ret > 0) {
-        jlong handles[ret];
-        for (int i = 0; i < ret; ++i) {
-            handles[i] = reinterpret_cast<jlong>(devHandles[i]);
-        }
-        jlongArray jlongArray = env->NewLongArray(ret);
-        env->SetLongArrayRegion(jlongArray, 0, ret, handles);
-        return jlongArray;
-    } else {
-        return nullptr;
+        // 默认只取第一个
+        devHandle = devHandles[0];
+        LOGD("devHandle = %p", devHandle);
+        return JNI_TRUE;
     }
+    return JNI_FALSE;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_qasky_tfcard_QTF_freeDevs(JNIEnv *env, jobject thiz) {
+Java_com_qasky_tfcard_QTF_freeDevices(JNIEnv *env, jobject thiz) {
     QCard_FreeStoreHandle(devHandles);
     LOGD("QCard_FreeStoreHandle");
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_QTF_loginDev(JNIEnv *env, jobject thiz, jlong dev_handle) {
-    int ret = QCard_Login(reinterpret_cast<QHANDLE>(dev_handle));
-    LOGD("QCard_Login ret = 0x%08x", ret);
+Java_com_qasky_tfcard_QTF_loginDevice(JNIEnv *env, jobject thiz) {
+    int ret = QCard_Login(devHandle);
+    LOGD("QCard_Login ret = %X", ret);
     return !ret;
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_QTF_logoutDev(JNIEnv *env, jobject thiz, jlong dev_handle) {
-    int ret = QCard_Logout(reinterpret_cast<QHANDLE>(dev_handle));
-    LOGD("QCard_Logout ret = 0x%08x", ret);
-    return !ret;
-}
-
-
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_QTF_initResource(JNIEnv *env, jobject thiz, jlong dev_handle) {
-    int ret = QCard_InitResource(reinterpret_cast<QHANDLE>(dev_handle));
-    LOGD("QCard_InitResource ret = 0x%08x", ret);
+Java_com_qasky_tfcard_QTF_logoutDevice(JNIEnv *env, jobject thiz) {
+    int ret = QCard_Logout(devHandle);
+    LOGD("QCard_Logout ret = %X", ret);
     return !ret;
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_QTF_updateResource(JNIEnv *env, jobject thiz, jlong dev_handle) {
-    int ret = QCard_UpdateResource(reinterpret_cast<QHANDLE>(dev_handle));
-    LOGD("QCard_UpdateResource ret = 0x%08x", ret);
+Java_com_qasky_tfcard_QTF_initResource(JNIEnv *env, jobject thiz) {
+    int ret = QCard_InitResource(devHandle);
+    LOGD("QCard_InitResource ret = %X", ret);
+    return !ret;
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_qasky_tfcard_QTF_updateResource(JNIEnv *env, jobject thiz) {
+    int ret = QCard_UpdateResource(devHandle);
+    LOGD("QCard_UpdateResource ret = %X", ret);
     return !ret;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_qasky_tfcard_QTF_destroyResource(JNIEnv *env, jobject thiz, jlong dev_handle) {
-    QCard_DestoryResource(reinterpret_cast<QHANDLE>(dev_handle));
+Java_com_qasky_tfcard_QTF_destroyResource(JNIEnv *env, jobject thiz) {
+    QCard_DestoryResource(devHandle);
     LOGD("QCard_DestoryResource");
 }
 
-
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_qasky_tfcard_QTF_getDeviceId(JNIEnv *env, jobject thiz, jlong dev_handle) {
+Java_com_qasky_tfcard_QTF_getDeviceId(JNIEnv *env, jobject thiz) {
     char storeId[64] = {0};
-    int ret = QCard_GetStoreId(reinterpret_cast<QHANDLE>(dev_handle), storeId);
-    LOGD("QCard_GetStoreId ret = 0x%08x storeId = %s", ret, storeId);
+    int ret = QCard_GetStoreId(devHandle, storeId);
+    LOGD("QCard_GetStoreId ret = %X storeId = %s", ret, storeId);
     return env->NewStringUTF(storeId);
 }
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_qasky_tfcard_QTF_getSystemId(JNIEnv *env, jobject thiz, jlong dev_handle, jstring app_name, jstring con_name) {
+Java_com_qasky_tfcard_QTF_getSystemId(JNIEnv *env, jobject thiz, jstring app_name, jstring con_name) {
     char *appName = const_cast<char *>(env->GetStringUTFChars(app_name, JNI_FALSE));
     char *conName = const_cast<char *>(env->GetStringUTFChars(con_name, JNI_FALSE));
     char systemId[64] = {0};
-    int ret = QCard_GetSysTemId(reinterpret_cast<QHANDLE>(dev_handle), appName, conName, systemId);
-    LOGD("QCard_GetSysTemId ret = 0x%08x systemId = %s", ret, systemId);
+    int ret = QCard_GetSysTemId(devHandle, appName, conName, systemId);
+    LOGD("QCard_GetSysTemId ret = %X systemId = %s", ret, systemId);
     env->ReleaseStringUTFChars(app_name, appName);
     env->ReleaseStringUTFChars(con_name, conName);
     return env->NewStringUTF(systemId);
 }
 
 extern "C"
-JNIEXPORT jlongArray JNICALL
-Java_com_qasky_tfcard_QTF_queryKeyLength(JNIEnv *env, jobject thiz, jlong dev_handle, jstring app_name, jstring con_name) {
+JNIEXPORT jint JNICALL
+Java_com_qasky_tfcard_QTF_queryKeyLength(JNIEnv *env, jobject thiz, jstring device_id, jstring app_name, jstring con_name) {
+    char *deviceId = const_cast<char *>(env->GetStringUTFChars(device_id, JNI_FALSE));
     char *appName = const_cast<char *>(env->GetStringUTFChars(app_name, JNI_FALSE));
     char *conName = const_cast<char *>(env->GetStringUTFChars(con_name, JNI_FALSE));
-    unsigned long totalLen;
-    unsigned long usedLen;
-    char devId[64] = {0};
-    int ret = 0;
+    unsigned long totalLen = 0;
+    unsigned long usedLen = 0;
 
-    ret = QCard_GetStoreId(reinterpret_cast<QHANDLE>(dev_handle), devId);
-    LOGD("QCard_GetStoreId ret = 0x%08x devId = %s", ret, devId);
+    int ret = QCard_QueryKey(devHandle, deviceId, appName, conName, &totalLen, &usedLen);
+    LOGD("QCard_QueryKey ret = %X totalLen = %lu usedLen = %lu", ret, totalLen, usedLen);
 
-    ret = QCard_QueryKey(reinterpret_cast<QHANDLE>(dev_handle), devId, appName, conName, &totalLen, &usedLen);
-    LOGD("QCard_QueryKey ret = 0x%08x totalLen = %lu usedLen = %lu", ret, totalLen, usedLen);
-
-    unsigned long KeyLenInfo[] = {totalLen, usedLen};
-    jlongArray longArray = env->NewLongArray(2);
-    env->SetLongArrayRegion(longArray, 0, 2, reinterpret_cast<const jlong *>(KeyLenInfo));
+    env->ReleaseStringUTFChars(device_id, deviceId);
     env->ReleaseStringUTFChars(app_name, appName);
     env->ReleaseStringUTFChars(con_name, conName);
-    return longArray;
+    return (int)(totalLen - usedLen);
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_QTF_chargeKey(JNIEnv *env, jobject thiz, jlong dev_handle, jstring _host, jstring app_name, jstring con_name, jstring user_pin) {
+Java_com_qasky_tfcard_QTF_chargeKey(JNIEnv *env, jobject thiz, jstring _host, jstring app_name, jstring con_name, jstring user_pin) {
     char *host = const_cast<char *>(env->GetStringUTFChars(_host, JNI_FALSE));
     char *appName = const_cast<char *>(env->GetStringUTFChars(app_name, JNI_FALSE));
     char *conName = const_cast<char *>(env->GetStringUTFChars(con_name, JNI_FALSE));
     char *userPIN = const_cast<char *>(env->GetStringUTFChars(user_pin, JNI_FALSE));
 
-    int ret = QCard_ProxyOnlineChargingKey(reinterpret_cast<QHANDLE>(dev_handle), host, appName, conName, userPIN, 1024);
-    LOGD("QCard_ProxyOnlineChargingKey ret = 0x%08x", ret);
+    int ret = QCard_ProxyOnlineChargingKey(devHandle, host, appName, conName, userPIN, 1024);
+    LOGD("QCard_ProxyOnlineChargingKey ret = %X", ret);
 
     env->ReleaseStringUTFChars(_host, host);
     env->ReleaseStringUTFChars(app_name, appName);
@@ -152,7 +141,7 @@ Java_com_qasky_tfcard_QTF_chargeKey(JNIEnv *env, jobject thiz, jlong dev_handle,
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_qasky_tfcard_QTF_getKeyHandle(JNIEnv *env, jobject thiz, jlong dev_handle, jstring app_name, jstring con_name, jstring user_pin, jstring check_code, jstring _flag) {
+Java_com_qasky_tfcard_QTF_getKeyHandle(JNIEnv *env, jobject thiz, jstring app_name, jstring con_name, jstring user_pin, jstring check_code, jstring _flag) {
     char *appName = const_cast<char *>(env->GetStringUTFChars(app_name, JNI_FALSE));
     char *conName = const_cast<char *>(env->GetStringUTFChars(con_name, JNI_FALSE));
     char *userPin = const_cast<char *>(env->GetStringUTFChars(user_pin, JNI_FALSE));
@@ -163,8 +152,8 @@ Java_com_qasky_tfcard_QTF_getKeyHandle(JNIEnv *env, jobject thiz, jlong dev_hand
     KeyParam.PaddingType = 1;
     KEYHANDLE keyHandle = nullptr;
 
-    int ret = QCard_ClientKeyInit(reinterpret_cast<QHANDLE>(dev_handle), checkCode, flag, SGD_SMS4_ECB, KeyParam, appName, conName, userPin, TAC_SAFE_CLEARR, &keyHandle);
-    LOGD("QCard_ClientKeyInit ret = 0x%08x keyHandle = %p", ret, keyHandle);
+    int ret = QCard_ClientKeyInit(devHandle, checkCode, flag, SGD_SMS4_ECB, KeyParam, appName, conName, userPin, TAC_SAFE_CLEARR, &keyHandle);
+    LOGD("QCard_ClientKeyInit ret = %X keyHandle = %p", ret, keyHandle);
 
     env->ReleaseStringUTFChars(app_name, appName);
     env->ReleaseStringUTFChars(con_name, conName);
@@ -176,7 +165,7 @@ Java_com_qasky_tfcard_QTF_getKeyHandle(JNIEnv *env, jobject thiz, jlong dev_hand
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_qasky_tfcard_QTF_importExternalSessionKey(JNIEnv *env, jobject thiz, jlong dev_handle, jbyteArray _key) {
+Java_com_qasky_tfcard_QTF_importExternalSessionKey(JNIEnv *env, jobject thiz, jbyteArray _key) {
     long keyLen = env->GetArrayLength(_key);
     jbyte *jbp_key = env->GetByteArrayElements(_key, JNI_FALSE);
     auto *key = (unsigned char *) jbp_key;
@@ -187,8 +176,8 @@ Java_com_qasky_tfcard_QTF_importExternalSessionKey(JNIEnv *env, jobject thiz, jl
     memset(&KeyParam, 0, sizeof(KeyParam));
     KeyParam.PaddingType = 1;
     KeyParam.IVLen = 16;
-    int ret = QCard_ExternalKeyInit(reinterpret_cast<QHANDLE>(dev_handle), key, keyLen, SGD_SMS4_CBC, KeyParam, &keyHandle);
-    LOGD("QCard_ExternalKeyInit ret = 0x%08x keyHandle = %p", ret, keyHandle);
+    int ret = QCard_ExternalKeyInit(devHandle, key, keyLen, SGD_SMS4_CBC, KeyParam, &keyHandle);
+    LOGD("QCard_ExternalKeyInit ret = %X keyHandle = %p", ret, keyHandle);
 
     env->ReleaseByteArrayElements(_key, jbp_key, JNI_FALSE);
 
@@ -197,19 +186,19 @@ Java_com_qasky_tfcard_QTF_importExternalSessionKey(JNIEnv *env, jobject thiz, jl
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_qasky_tfcard_QTF_freeKeyHandle(JNIEnv *env, jobject thiz, jlong dev_handle, jlong key_handle) {
-    QCard_KeyFinal(reinterpret_cast<QHANDLE>(dev_handle), reinterpret_cast<KEYHANDLE>(key_handle));
+Java_com_qasky_tfcard_QTF_freeKeyHandle(JNIEnv *env, jobject thiz, jlong key_handle) {
+    QCard_KeyFinal(devHandle, reinterpret_cast<KEYHANDLE>(key_handle));
     LOGD("QCard_KeyFinal");
 }
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_QTF_getSoftKey(JNIEnv *env, jobject thiz, jlong dev_handle, jlong key_handle, jlong key_len) {
+Java_com_qasky_tfcard_QTF_getSoftKey(JNIEnv *env, jobject thiz, jlong key_handle, jlong key_len) {
     unsigned char softKey[key_len];
     memset(softKey, 0, key_len);
 
-    int ret = QCard_ExportKey(reinterpret_cast<QHANDLE>(dev_handle), reinterpret_cast<KEYHANDLE>(key_handle), softKey, reinterpret_cast<unsigned long *>(&key_len));
-    LOGD("QCard_ExportKey ret = 0x%08x softKey = %s", ret, ByteArrayToHexStr(softKey, key_len));
+    int ret = QCard_ExportKey(devHandle, reinterpret_cast<KEYHANDLE>(key_handle), softKey, reinterpret_cast<unsigned long *>(&key_len));
+    LOGD("QCard_ExportKey ret = %X softKey = %s", ret, ByteArrayToHexStr(softKey, key_len));
 
     jbyteArray jbyteArray_softKey = env->NewByteArray(key_len);
     env->SetByteArrayRegion(jbyteArray_softKey, 0, key_len, reinterpret_cast<const jbyte *>(softKey));
@@ -218,7 +207,7 @@ Java_com_qasky_tfcard_QTF_getSoftKey(JNIEnv *env, jobject thiz, jlong dev_handle
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_QTF_encrypt(JNIEnv *env, jobject thiz, jlong dev_handle, jlong key_handle, jbyteArray plain) {
+Java_com_qasky_tfcard_QTF_encrypt(JNIEnv *env, jobject thiz, jlong key_handle, jbyteArray plain) {
     long srcLen = env->GetArrayLength(plain);
     jbyte *src = env->GetByteArrayElements(plain, JNI_FALSE);
     auto *srcData = (unsigned char *) src;
@@ -226,8 +215,8 @@ Java_com_qasky_tfcard_QTF_encrypt(JNIEnv *env, jobject thiz, jlong dev_handle, j
     unsigned char destData[destLen];
     memset(destData, 0, destLen);
 
-    int ret = QCard_Encrypt(reinterpret_cast<QHANDLE>(dev_handle), reinterpret_cast<KEYHANDLE>(key_handle), srcData, srcLen, destData, &destLen);
-    LOGD("QCard_Encrypt ret = 0x%08x", ret);
+    int ret = QCard_Encrypt(devHandle, reinterpret_cast<KEYHANDLE>(key_handle), srcData, srcLen, destData, &destLen);
+    LOGD("QCard_Encrypt ret = %X", ret);
     LOGD("QCard_Encrypt plain = %s", ByteArrayToHexStr(srcData, srcLen));
     LOGD("QCard_Encrypt cipher = %s", ByteArrayToHexStr(destData, destLen));
 
@@ -239,7 +228,7 @@ Java_com_qasky_tfcard_QTF_encrypt(JNIEnv *env, jobject thiz, jlong dev_handle, j
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_QTF_decrypt(JNIEnv *env, jobject thiz, jlong dev_handle, jlong key_handle, jbyteArray cipher) {
+Java_com_qasky_tfcard_QTF_decrypt(JNIEnv *env, jobject thiz, jlong key_handle, jbyteArray cipher) {
     long srcLen = env->GetArrayLength(cipher);
     jbyte *src = env->GetByteArrayElements(cipher, JNI_FALSE);
     auto *srcData = (unsigned char *) src;
@@ -247,8 +236,8 @@ Java_com_qasky_tfcard_QTF_decrypt(JNIEnv *env, jobject thiz, jlong dev_handle, j
     unsigned char destData[destLen];
     memset(destData, 0, sizeof(destData));
 
-    int ret = QCard_Decrypt(reinterpret_cast<QHANDLE>(dev_handle), reinterpret_cast<KEYHANDLE>(key_handle), srcData, srcLen, destData, &destLen);
-    LOGD("QCard_Decrypt ret = 0x%08x", ret);
+    int ret = QCard_Decrypt(devHandle, reinterpret_cast<KEYHANDLE>(key_handle), srcData, srcLen, destData, &destLen);
+    LOGD("QCard_Decrypt ret = %X", ret);
     LOGD("QCard_Decrypt cipher = %s", ByteArrayToHexStr(srcData, srcLen));
     LOGD("QCard_Decrypt plain = %s", ByteArrayToHexStr(destData, destLen));
 
@@ -261,17 +250,17 @@ Java_com_qasky_tfcard_QTF_decrypt(JNIEnv *env, jobject thiz, jlong dev_handle, j
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_QTF_exportCert(JNIEnv *env, jobject thiz, jlong dev_handle, jint type, jstring app_name, jstring con_name) {
+Java_com_qasky_tfcard_QTF_exportCert(JNIEnv *env, jobject thiz, jint type, jstring app_name, jstring con_name) {
     char *appName = const_cast<char *>(env->GetStringUTFChars(app_name, JNI_FALSE));
     char *conName = const_cast<char *>(env->GetStringUTFChars(con_name, JNI_FALSE));
     unsigned long certLen = 0, timeOut = 0;
 
-    int ret = QCard_ExportCertificate(reinterpret_cast<QHANDLE>(dev_handle), appName, conName, type, nullptr, &certLen, &timeOut);
-    LOGD("QCard_ExportCertificate ret = 0x%08x certLen = %lu", ret, certLen);
+    int ret = QCard_ExportCertificate(devHandle, appName, conName, type, nullptr, &certLen, &timeOut);
+    LOGD("QCard_ExportCertificate ret = %X certLen = %lu", ret, certLen);
     unsigned char cert[certLen];
     memset(cert, 0, certLen);
-    ret = QCard_ExportCertificate(reinterpret_cast<QHANDLE>(dev_handle), appName, conName, type, cert, &certLen, &timeOut);
-    LOGD("QCard_ExportCertificate ret = 0x%08x cert = %s", ret, ByteArrayToHexStr(cert, certLen));
+    ret = QCard_ExportCertificate(devHandle, appName, conName, type, cert, &certLen, &timeOut);
+    LOGD("QCard_ExportCertificate ret = %X cert = %s", ret, ByteArrayToHexStr(cert, certLen));
 
     jbyteArray jbyteArray_cert = env->NewByteArray(certLen);
     env->SetByteArrayRegion(jbyteArray_cert, 0, certLen, reinterpret_cast<const jbyte *>(cert));
@@ -282,17 +271,17 @@ Java_com_qasky_tfcard_QTF_exportCert(JNIEnv *env, jobject thiz, jlong dev_handle
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_qasky_tfcard_QTF_exportPubKey(JNIEnv *env, jobject thiz, jlong dev_handle, jint type, jstring app_name, jstring con_name) {
+Java_com_qasky_tfcard_QTF_exportPubKey(JNIEnv *env, jobject thiz, jint type, jstring app_name, jstring con_name) {
     char *appName = const_cast<char *>(env->GetStringUTFChars(app_name, JNI_FALSE));
     char *conName = const_cast<char *>(env->GetStringUTFChars(con_name, JNI_FALSE));
     unsigned long keyLen = 0;
 
-    int ret = QCard_ExportPublicKey(reinterpret_cast<QHANDLE>(dev_handle), appName, conName, type, nullptr, &keyLen);
-    LOGD("QCard_ExportPublicKey ret = 0x%08x keyLen = %lu", ret, keyLen);
+    int ret = QCard_ExportPublicKey(devHandle, appName, conName, type, nullptr, &keyLen);
+    LOGD("QCard_ExportPublicKey ret = %X keyLen = %lu", ret, keyLen);
     unsigned char key[keyLen];
     memset(key, 0, keyLen);
-    ret = QCard_ExportPublicKey(reinterpret_cast<QHANDLE>(dev_handle), appName, conName, type, key, &keyLen);
-    LOGD("QCard_ExportPublicKey ret = 0x%08x key = %s", ret, ByteArrayToHexStr(key, keyLen));
+    ret = QCard_ExportPublicKey(devHandle, appName, conName, type, key, &keyLen);
+    LOGD("QCard_ExportPublicKey ret = %X key = %s", ret, ByteArrayToHexStr(key, keyLen));
 
     jbyteArray jbyteArray_key = env->NewByteArray(keyLen);
     env->SetByteArrayRegion(jbyteArray_key, 0, keyLen, reinterpret_cast<const jbyte *>(key));
@@ -303,13 +292,13 @@ Java_com_qasky_tfcard_QTF_exportPubKey(JNIEnv *env, jobject thiz, jlong dev_hand
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_qasky_tfcard_QTF_verifyAppPIN(JNIEnv *env, jobject thiz, jlong dev_handle, jstring app_name, jstring _pin) {
+Java_com_qasky_tfcard_QTF_verifyAppPIN(JNIEnv *env, jobject thiz, jstring app_name, jstring _pin) {
     char *appName = const_cast<char *>(env->GetStringUTFChars(app_name, JNI_FALSE));
     char *pin = const_cast<char *>(env->GetStringUTFChars(_pin, JNI_FALSE));
     unsigned long retryCount;
 
-    int ret = QCard_VerifyAppPIN(reinterpret_cast<QHANDLE>(dev_handle), appName, pin, &retryCount);
-    LOGD("QCard_VerifyAppPIN ret = 0x%08x retryCount = %lu", ret, retryCount);
+    int ret = QCard_VerifyAppPIN(devHandle, appName, pin, &retryCount);
+    LOGD("QCard_VerifyAppPIN ret = %X retryCount = %lu", ret, retryCount);
 
     env->ReleaseStringUTFChars(app_name, appName);
     return !ret;
@@ -329,7 +318,7 @@ Java_com_qasky_tfcard_QTF_negoOLBizKey(JNIEnv *env, jobject thiz, jstring _host,
     char checkCode[64] = {0};
 
     int ret = QCard_ClientRequestOnlineBizKey(host, deviceId, systemId, secretId, serverId, visitKeyBase64, reinterpret_cast<const unsigned char *>(protectKey), &flag, checkCode);
-    LOGD("QCard_ClientRequestOnlineBizKey ret = 0x%08x \nflag = \n%s\ncheckCode = %s", ret, flag, checkCode);
+    LOGD("QCard_ClientRequestOnlineBizKey ret = %X \nflag = \n%s\ncheckCode = %s", ret, flag, checkCode);
 
     env->ReleaseStringUTFChars(_host, host);
     env->ReleaseStringUTFChars(device_id, deviceId);
@@ -348,10 +337,10 @@ Java_com_qasky_tfcard_QTF_negoOLBizKey(JNIEnv *env, jobject thiz, jstring _host,
     }
 }
 
-extern "C"
-JNIEXPORT jlong JNICALL
-Java_com_qasky_tfcard_QTF_negoOLKey(JNIEnv *env, jobject thiz, jlong dev_handle) {
-//    auto devHandle = reinterpret_cast<QHANDLE>(dev_handle);
+//extern "C"
+//JNIEXPORT jlong JNICALL
+//Java_com_qasky_tfcard_QTF_negoOLKey(JNIEnv *env, jobject thiz) {
+//    auto devHandle = devHandle;
 //
 //    char appName[] = "QSKCTS";
 //    char conName[] = "QSKCTS";
@@ -396,7 +385,7 @@ Java_com_qasky_tfcard_QTF_negoOLKey(JNIEnv *env, jobject thiz, jlong dev_handle)
 //    LOGD("QCard_GetSysTemId ret = %08x systemId = %s", ret, systemId);
 //
 //    ret = QCard_ServerProxyRequestQkey(secTunnelHandle, devId, linkId, systemId, keyLen, keyId, flagChkV, flag, &offerSoftKey, cipherQKey, &cipherQKeyLen);
-//    LOGD("QCard_ServerProxyRequestQkey ret = 0x%08x", ret);
+//    LOGD("QCard_ServerProxyRequestQkey ret = %X", ret);
 //    LOGD("QCard_ServerProxyRequestQkey devId = %s", devId);
 //    LOGD("QCard_ServerProxyRequestQkey linkId = %s", linkId);
 //    LOGD("QCard_ServerProxyRequestQkey systemId = %s", systemId);
@@ -426,7 +415,7 @@ Java_com_qasky_tfcard_QTF_negoOLKey(JNIEnv *env, jobject thiz, jlong dev_handle)
 //        ret = QCard_ClientGetQkey(devHandle, qccsId, systemId, pin, flagChkV, flag, offerSoftKey, cipherQKey, cipherQKeyLen, qkey, &qkeyLen);
 //        LOGD("QCard_ClientGetQkey ret = %08x qkeyLen = %d qkey = %s", ret, qkeyLen, ByteArrayToHexStr(qkey, qkeyLen));
 //
-//        ret = char_array_cmp(reinterpret_cast<char *>(qkeyRead), (int)qkeyReadLen, reinterpret_cast<char *>(qkey), (int)qkeyLen);
+//        ret = char_array_cmp(reinterpret_cast<char *>(qkeyRead), (int) qkeyReadLen, reinterpret_cast<char *>(qkey), (int) qkeyLen);
 //        LOGD("compare key ret = %d", ret);
 //
 //        QCard_BLOCKCIPHERPARAM KeyParam;
@@ -483,11 +472,10 @@ Java_com_qasky_tfcard_QTF_negoOLKey(JNIEnv *env, jobject thiz, jlong dev_handle)
 //    memset(dest, 0, sizeof(dest));
 //
 //    ret = QCard_Decrypt(devHandle, keyHandle, cipher, cipherLen, dest, &destLen);
-//    LOGD("QCard_Decrypt ret = 0x%08x destLen = %lu dest = %s", ret, destLen, ByteArrayToHexStr(dest, destLen));
+//    LOGD("QCard_Decrypt ret = %X destLen = %lu dest = %s", ret, destLen, ByteArrayToHexStr(dest, destLen));
 //
-//    ret = char_array_cmp(reinterpret_cast<char *>(plain), (int)plainLen, reinterpret_cast<char *>(dest), (int)destLen);
+//    ret = char_array_cmp(reinterpret_cast<char *>(plain), (int) plainLen, reinterpret_cast<char *>(dest), (int) destLen);
 //    LOGD("compare enc and dec ret = %d", ret);
 //
 //    return reinterpret_cast<jlong>(keyHandle);
-    return 0;
-}
+//}
