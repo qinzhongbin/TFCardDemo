@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <androidx.appcompat.widget.LinearLayoutCompat
@@ -14,264 +11,31 @@
         android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/exportEncCert"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="resetParams"
-            android:text="参数设置" />
+            android:onClick="expDevInfo"
+            android:text="导出设备信息" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/CTSNegotiate"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:onClick="CTSNegoFillQKey"
+            android:text="CTS协商充注密钥" />
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/enumDev"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="enumDev"
-                android:text="枚举设备"
-                app:layout_constraintEnd_toStartOf="@id/freeDevs"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/negoOLKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="CTSNegoOLQKey"
+            android:text="CTS协商在线密钥" />
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/freeDevs"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="freeDevs"
-                android:text="释放设备"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/enumDev"
-                app:layout_constraintTop_toTopOf="@id/enumDev" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/loginDev"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="loginDev"
-                android:text="登录设备"
-                app:layout_constraintEnd_toStartOf="@id/logoutDev"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/enumDev" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/logoutDev"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="logoutDev"
-                android:text="登出设备"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/loginDev"
-                app:layout_constraintTop_toTopOf="@id/loginDev" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/initResource"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="initResource"
-                android:text="初始化资源"
-                app:layout_constraintEnd_toStartOf="@id/updateResource"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/loginDev" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/updateResource"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="updateResource"
-                android:text="更新资源"
-                app:layout_constraintEnd_toStartOf="@id/destroyResource"
-                app:layout_constraintStart_toEndOf="@id/initResource"
-                app:layout_constraintTop_toTopOf="@id/initResource" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/destroyResource"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="destroyResource"
-                android:text="销毁资源"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/updateResource"
-                app:layout_constraintTop_toTopOf="@id/updateResource" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/getDevId"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="getDevId"
-                android:text="获取设备ID"
-                app:layout_constraintEnd_toStartOf="@id/getSysId"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/initResource" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/getSysId"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="getSysId"
-                android:text="获取系统ID"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/getDevId"
-                app:layout_constraintTop_toTopOf="@id/getDevId" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/queryKeyLength"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="queryKeyLength"
-                android:text="查询密钥余量"
-                app:layout_constraintEnd_toStartOf="@id/chargeKey"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/getDevId" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/chargeKey"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="chargeKey"
-                android:text="充注密钥"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/queryKeyLength"
-                app:layout_constraintTop_toTopOf="@id/queryKeyLength" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/CTSNegotiate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="CTSNegotiate"
-                android:text="CTS协商密钥"
-                app:layout_constraintEnd_toStartOf="@id/negoOLBizKey"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/queryKeyLength" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/negoOLBizKey"
-                android:layout_width="0dp"
-                android:onClick="negoOLBizKey"
-                android:layout_height="wrap_content"
-                android:text="协商在线业务密钥"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/CTSNegotiate"
-                app:layout_constraintTop_toTopOf="@id/CTSNegotiate" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/getKeyHandle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="getKeyHandle"
-                android:text="获取密钥句柄"
-                app:layout_constraintEnd_toStartOf="@id/freeKeyHandle"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/CTSNegotiate" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/freeKeyHandle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="freeKeyHandle"
-                android:text="释放密钥句柄"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/getKeyHandle"
-                app:layout_constraintTop_toTopOf="@id/getKeyHandle" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/negoOLKey"
-                android:onClick="negoOLKey"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/getKeyHandle"
-                android:text="在线密钥协商"/>
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/encrypt"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="encrypt"
-                android:text="加密"
-                app:layout_constraintEnd_toStartOf="@id/decrypt"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/negoOLKey" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/decrypt"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="decrypt"
-                android:text="解密"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/encrypt"
-                app:layout_constraintTop_toTopOf="@id/encrypt" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/getSoftKey"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="getSoftKey"
-                android:text="获取软密钥"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/encrypt" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/exportEncCert"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="exportEncCert"
-                android:text="导出加密证书"
-                app:layout_constraintEnd_toStartOf="@id/exportSignCert"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/getSoftKey" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/exportSignCert"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="exportSignCert"
-                android:text="导出签名证书"
-                app:layout_constraintStart_toEndOf="@id/exportEncCert"
-                app:layout_constraintEnd_toStartOf="@+id/exportRootCert"
-                app:layout_constraintTop_toTopOf="@id/exportEncCert" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/exportRootCert"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="exportRootCert"
-                android:text="导出根证书"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/exportSignCert"
-                app:layout_constraintTop_toTopOf="@id/exportEncCert" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/exportEncPubKey"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="exportEncPubKey"
-                android:text="导出加密公钥"
-                app:layout_constraintEnd_toStartOf="@id/exportSignPubKey"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/exportEncCert" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/exportSignPubKey"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="exportSignPubKey"
-                android:text="导出签名公钥"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/exportEncPubKey"
-                app:layout_constraintTop_toTopOf="@id/exportEncPubKey" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/test"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="test"
-                android:text="test"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/exportEncPubKey" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/negoOLBizKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="CTSNegoOLBizQKey"
+            android:text="CTS协商在线业务密钥" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.core.widget.NestedScrollView>

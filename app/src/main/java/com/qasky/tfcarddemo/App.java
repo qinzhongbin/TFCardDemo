@@ -27,13 +27,14 @@ public class App extends MultiDexApplication {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    public static String LOG_TAG = "QaSky";
 
     @Override
     public void onCreate() {
         super.onCreate();
         Utils.init(this);
         LogUtils.getConfig()
-                .setGlobalTag("QaSky")
+                .setGlobalTag(LOG_TAG)
                 .setLogHeadSwitch(false)
                 .setBorderSwitch(false);
 
