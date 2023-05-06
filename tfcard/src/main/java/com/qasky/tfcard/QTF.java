@@ -188,4 +188,21 @@ public class QTF {
      * @return 协商信息
      */
     public native NegotiateInfo negoOLBizKey(String host, String deviceId, String systemId, String secretId, String serverId, String visitKeyBase64, String protectKey);
+
+
+    /**
+     * 获取认证同步码
+     * @param peerDeviceId 对端设备id
+     * @param appName       应用名
+     * @param conName       容器名
+     * @param pin           用户PIN
+     * @return              同步认证标志
+     */
+    public native String readAuthSynFlag(String peerDeviceId, String appName, String conName, String pin);
+
+
+    public native String authSynFlag(String peerDeviceId, String appName, String conName, String pin);
+
+
+
 }

@@ -479,3 +479,90 @@ Java_com_qasky_tfcard_QTF_negoOLBizKey(JNIEnv *env, jobject thiz, jstring _host,
 //
 //    return reinterpret_cast<jlong>(keyHandle);
 //}
+
+
+//
+//extern "C"
+//JNIEXPORT jboolean JNICALL
+//Java_com_qasky_tfcard_TFCard_authSynFlag(JNIEnv *env, jobject thiz, jstring pc_other_store_id, jstring pc_app_name, jstring pc_container_name, jstring pc_pin, jstring pc_flag) {
+//    int ret = 0;
+//
+//    char *pcOtherStoreId = const_cast<char *>(env->GetStringUTFChars(pc_other_store_id, JNI_FALSE));
+//    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
+//    char *pcContainerName = const_cast<char *>(env->GetStringUTFChars(pc_container_name, JNI_FALSE));
+//    char *pcPin = const_cast<char *>(env->GetStringUTFChars(pc_pin, JNI_FALSE));
+//    char *pcFlag = const_cast<char *>(env->GetStringUTFChars(pc_flag, JNI_FALSE));
+//
+//    ret = QCard_AuthSynFlag(phStoreHandles[0], pcOtherStoreId, pcAppName, pcContainerName, pcPin, pcFlag);
+//    env->ReleaseStringUTFChars(pc_other_store_id, pcOtherStoreId);
+//    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
+//    env->ReleaseStringUTFChars(pc_container_name, pcContainerName);
+//    env->ReleaseStringUTFChars(pc_pin, pcPin);
+//    env->ReleaseStringUTFChars(pc_flag, pcFlag);
+//    if (ret) {
+//        LOGE("QCard_AuthSynFlag error: %x", ret);
+//        return JNI_FALSE;
+//    }
+//
+//    return JNI_TRUE;
+//}
+//
+//extern "C"
+//JNIEXPORT jboolean JNICALL
+//Java_com_qasky_tfcard_TFCard_getKeyHandleByC2C(JNIEnv *env, jobject thiz, jstring pc_other_store_id, jstring pc_flag, jstring pc_app_name, jstring pc_container_name, jstring pc_pin) {
+//    int ret = 0;
+//
+//    char *pcOtherStoreId = const_cast<char *>(env->GetStringUTFChars(pc_other_store_id, JNI_FALSE));
+//    char *pcAppName = const_cast<char *>(env->GetStringUTFChars(pc_app_name, JNI_FALSE));
+//    char *pcContainerName = const_cast<char *>(env->GetStringUTFChars(pc_container_name, JNI_FALSE));
+//    char *pcPin = const_cast<char *>(env->GetStringUTFChars(pc_pin, JNI_FALSE));
+//    char *pcFlag = const_cast<char *>(env->GetStringUTFChars(pc_flag, JNI_FALSE));
+//
+//    memset(&KeyParam, 0, sizeof(KeyParam));
+//    ret = QCard_AuthSynFlagKeyInit(phStoreHandles[0], pcOtherStoreId, pcFlag, SGD_SM1_CBC, KeyParam, pcAppName, pcContainerName, pcPin, TAC_SAFE_CLEARR, &hKeyHandle);
+//    env->ReleaseStringUTFChars(pc_other_store_id, pcOtherStoreId);
+//    env->ReleaseStringUTFChars(pc_app_name, pcAppName);
+//    env->ReleaseStringUTFChars(pc_container_name, pcContainerName);
+//    env->ReleaseStringUTFChars(pc_pin, pcPin);
+//    env->ReleaseStringUTFChars(pc_flag, pcFlag);
+//    if (ret) {
+//        LOGE("QCard_AuthSynFlagKeyInit error: %x", ret);
+//        return JNI_FALSE;
+//    }
+//    return JNI_TRUE;
+//}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_qasky_tfcard_QTF_readAuthSynFlag(JNIEnv *env, jobject thiz, jstring peer_device_id, jstring app_name, jstring con_name, jstring _pin) {
+    int ret = 0;
+    char *flag = nullptr;
+    unsigned long flagLen = 0;
+
+    char *peerDeviceId = const_cast<char *>(env->GetStringUTFChars(peer_device_id, JNI_FALSE));
+    char *appName = const_cast<char *>(env->GetStringUTFChars(app_name, JNI_FALSE));
+    char *conName = const_cast<char *>(env->GetStringUTFChars(con_name, JNI_FALSE));
+    char *pin = const_cast<char *>(env->GetStringUTFChars(_pin, JNI_FALSE));
+
+    ret = QCard_ReadAuthSynFlag(devHandle, peerDeviceId, appName, conName, pin, flag, &flagLen);
+    LOGE("QCard_ReadAuthSynFlag ret = %X", ret);
+
+    flag = (char *) malloc(flagLen);
+    memset(flag, 0, flagLen);
+
+    ret = QCard_ReadAuthSynFlag(devHandle, peerDeviceId, appName, conName, pin, flag, &flagLen);
+    LOGE("QCard_ReadAuthSynFlag ret = %X", ret);
+
+    env->ReleaseStringUTFChars(peer_device_id, peerDeviceId);
+    env->ReleaseStringUTFChars(app_name, appName);
+    env->ReleaseStringUTFChars(con_name, conName);
+    env->ReleaseStringUTFChars(_pin, pin);
+
+    return env->NewStringUTF(flag);
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_qasky_tfcard_QTF_authSynFlag(JNIEnv *env, jobject thiz, jstring peer_device_id, jstring app_name, jstring con_name, jstring pin) {
+    // TODO: implement authSynFlag()
+}
