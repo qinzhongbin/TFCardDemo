@@ -11,31 +11,31 @@
         android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/exportEncCert"
+            android:id="@+id/CTSNegoChargingKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="expDevInfo"
-            android:text="导出设备信息" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/CTSNegotiate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="CTSNegoFillQKey"
+            android:onClick="CTSNegoChargingKey"
             android:text="CTS协商充注密钥" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/negoOLKey"
+            android:id="@+id/CTSNegoOLQKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="CTSNegoOLQKey"
             android:text="CTS协商在线密钥" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/negoOLBizKey"
+            android:id="@+id/CTSNegoOLBizQKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="CTSNegoOLBizQKey"
             android:text="CTS协商在线业务密钥" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/CTCNego"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="CTCNego"
+            android:text="CTC协商" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.core.widget.NestedScrollView>

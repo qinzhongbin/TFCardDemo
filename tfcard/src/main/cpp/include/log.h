@@ -25,8 +25,8 @@ inline char *ByteArrayToHexStr(unsigned char *src, int srcLen) {
         else dest[i * 2 + 1] = lowByte;
     }
 
-    char *hexStr = static_cast<char *>(malloc(destLen + 2));
-    sprintf(hexStr, "%s%s", "0x", dest);
+    char *hexStr = static_cast<char *>(malloc(destLen));
+    strcpy(hexStr, dest);
     return hexStr;
 }
 
