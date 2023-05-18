@@ -37,5 +37,11 @@
             android:layout_height="wrap_content"
             android:onClick="CTCNego"
             android:text="CTC协商" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:layout_width="wrap_content"
+            android:onClick="TEST"
+            android:text="TEST"
+            android:layout_height="wrap_content" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.core.widget.NestedScrollView>

@@ -6,6 +6,7 @@
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
+// 似乎有限制 src达到1Mb会崩溃
 inline char *ByteArrayToHexStr(unsigned char *src, int srcLen) {
     int destLen = 2 * srcLen + 1;
     char dest[destLen];

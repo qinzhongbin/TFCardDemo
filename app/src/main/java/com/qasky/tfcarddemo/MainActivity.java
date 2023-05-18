@@ -373,4 +373,40 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
+
+    public void TEST(View view) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (qtf.EnumStoreHandle(getPackageName())) {
+                    if (qtf.Login()) {
+                        if (qtf.InitResource()) {
+                            byte[] key = "1234567890123456".getBytes();
+                            long keyHandle = qtf.ExternalKeyInit(key);
+
+                            String plain = new String(new char[1024 * 900]).replace("\0", "Q");
+
+                            long time = System.currentTimeMillis();
+                            byte[] encrypt = qtf.Encrypt(keyHandle, plain.getBytes(StandardCharsets.UTF_8));
+                            long time_encrypt = System.currentTimeMillis();
+                            LogUtils.d("加密耗时：" + (time_encrypt - time) + "ms");
+                            byte[] decrypt = qtf.Decrypt(keyHandle, encrypt);
+                            long time_decrypt = System.currentTimeMillis();
+                            LogUtils.d("解密耗时：" + (time_decrypt - time_encrypt) + "ms");
+                            LogUtils.d("总耗时：" + (time_decrypt - time) + "ms");
+
+                            LogUtils.d("结果：" + new String(decrypt, StandardCharsets.UTF_8));
+
+                            qtf.KeyFinal(keyHandle);
+
+                            qtf.UpdateResource();
+                            qtf.DestroyResource();
+                        }
+                        qtf.Login();
+                    }
+                    qtf.FreeStoreHandle();
+                }
+            }
+        }).start();
+    }
 }

@@ -19,7 +19,7 @@ Java_com_qasky_tfcard_QTF_EnumStoreHandle(JNIEnv *env, jobject thiz, jstring pkg
     char appPath[128];
     snprintf(appPath, 128, "%s%s", "Android/data/", pkgName);
 
-//    devHandles = nullptr;
+    devHandles = nullptr;
     int ret = QCard_EnumStoreHandle(&devHandles, pkgName, appPath);
     LOGD("QCard_EnumStoreHandle ret = %X devHandles = %p", ret, devHandles);
 
@@ -150,8 +150,8 @@ Java_com_qasky_tfcard_QTF_Encrypt(JNIEnv *env, jobject thiz, jlong key_handle, j
 
     int ret = QCard_Encrypt(devHandle, reinterpret_cast<KEYHANDLE>(key_handle), srcData, srcLen, destData, &destLen);
     LOGD("QCard_Encrypt ret = %X", ret);
-    LOGD("QCard_Encrypt plain = %s", ByteArrayToHexStr(srcData, srcLen));
-    LOGD("QCard_Encrypt cipher = %s", ByteArrayToHexStr(destData, destLen));
+//    LOGD("QCard_Encrypt plain = %s", ByteArrayToHexStr(srcData, srcLen));
+//    LOGD("QCard_Encrypt cipher = %s", ByteArrayToHexStr(destData, destLen));
 
     jbyteArray jbyteArray_dest = env->NewByteArray(destLen);
     env->SetByteArrayRegion(jbyteArray_dest, 0, destLen, reinterpret_cast<const jbyte *>(destData));
@@ -171,8 +171,8 @@ Java_com_qasky_tfcard_QTF_Decrypt(JNIEnv *env, jobject thiz, jlong key_handle, j
 
     int ret = QCard_Decrypt(devHandle, reinterpret_cast<KEYHANDLE>(key_handle), srcData, srcLen, destData, &destLen);
     LOGD("QCard_Decrypt ret = %X", ret);
-    LOGD("QCard_Decrypt cipher = %s", ByteArrayToHexStr(srcData, srcLen));
-    LOGD("QCard_Decrypt plain = %s", ByteArrayToHexStr(destData, destLen));
+//    LOGD("QCard_Decrypt cipher = %s", ByteArrayToHexStr(srcData, srcLen));
+//    LOGD("QCard_Decrypt plain = %s", ByteArrayToHexStr(destData, destLen));
 
     jbyteArray jbyteArray_dest = env->NewByteArray(destLen);
     env->SetByteArrayRegion(jbyteArray_dest, 0, destLen, reinterpret_cast<const jbyte *>(destData));
@@ -602,5 +602,3 @@ Java_com_qasky_tfcard_QTF_AuthSynFlagKeyInit(JNIEnv *env, jobject thiz, jstring 
 
     return reinterpret_cast<jlong>(keyHandle);
 }
-
-
