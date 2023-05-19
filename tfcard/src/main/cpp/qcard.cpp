@@ -145,16 +145,15 @@ Java_com_qasky_tfcard_QTF_Encrypt(JNIEnv *env, jobject thiz, jlong key_handle, j
     jbyte *src = env->GetByteArrayElements(plain, JNI_FALSE);
     auto *srcData = (unsigned char *) src;
     unsigned long destLen = srcLen + 16;
-    unsigned char destData[destLen];
+    auto *destData = (unsigned char *)malloc(destLen);
     memset(destData, 0, destLen);
 
     int ret = QCard_Encrypt(devHandle, reinterpret_cast<KEYHANDLE>(key_handle), srcData, srcLen, destData, &destLen);
     LOGD("QCard_Encrypt ret = %X", ret);
-//    LOGD("QCard_Encrypt plain = %s", ByteArrayToHexStr(srcData, srcLen));
-//    LOGD("QCard_Encrypt cipher = %s", ByteArrayToHexStr(destData, destLen));
 
     jbyteArray jbyteArray_dest = env->NewByteArray(destLen);
     env->SetByteArrayRegion(jbyteArray_dest, 0, destLen, reinterpret_cast<const jbyte *>(destData));
+
     env->ReleaseByteArrayElements(plain, src, JNI_FALSE);
     return jbyteArray_dest;
 }
@@ -166,13 +165,11 @@ Java_com_qasky_tfcard_QTF_Decrypt(JNIEnv *env, jobject thiz, jlong key_handle, j
     jbyte *src = env->GetByteArrayElements(cipher, JNI_FALSE);
     auto *srcData = (unsigned char *) src;
     unsigned long destLen = srcLen;
-    unsigned char destData[destLen];
-    memset(destData, 0, sizeof(destData));
+    auto *destData =(unsigned char *) malloc(destLen);
+    memset(destData, 0, destLen);
 
     int ret = QCard_Decrypt(devHandle, reinterpret_cast<KEYHANDLE>(key_handle), srcData, srcLen, destData, &destLen);
     LOGD("QCard_Decrypt ret = %X", ret);
-//    LOGD("QCard_Decrypt cipher = %s", ByteArrayToHexStr(srcData, srcLen));
-//    LOGD("QCard_Decrypt plain = %s", ByteArrayToHexStr(destData, destLen));
 
     jbyteArray jbyteArray_dest = env->NewByteArray(destLen);
     env->SetByteArrayRegion(jbyteArray_dest, 0, destLen, reinterpret_cast<const jbyte *>(destData));

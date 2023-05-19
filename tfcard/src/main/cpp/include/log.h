@@ -9,7 +9,7 @@
 // 似乎有限制 src达到1Mb会崩溃
 inline char *ByteArrayToHexStr(unsigned char *src, int srcLen) {
     int destLen = 2 * srcLen + 1;
-    char dest[destLen];
+    char *dest = (char *)malloc(destLen);
     memset(dest, 0, destLen);
     unsigned char highByte, lowByte;
 
@@ -45,4 +45,20 @@ inline int char_array_cmp(char *s1, int l1, char *s2, int l2)
     if(l1 > l2) return 1;
 
     return -1;//l1 < l2的情况。
+}
+
+inline unsigned int RSHash(char* str, unsigned int len)
+{
+    unsigned int b  = 378551;
+    unsigned int a  = 63689;
+    unsigned int hash = 0;
+    unsigned int i  = 0;
+
+    for(i = 0; i < len; str++, i++)
+    {
+        hash = hash * a + (*str);
+        a  = a * b;
+    }
+
+    return hash;
 }

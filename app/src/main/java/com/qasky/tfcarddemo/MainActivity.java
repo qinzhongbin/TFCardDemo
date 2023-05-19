@@ -384,18 +384,23 @@ public class MainActivity extends AppCompatActivity {
                             byte[] key = "1234567890123456".getBytes();
                             long keyHandle = qtf.ExternalKeyInit(key);
 
-                            String plain = new String(new char[1024 * 900]).replace("\0", "Q");
+//                            String plain = new String(new char[1024 * 1024 * 100]).replace("\0", "Q");
+//                            char[] data = new char[1024 * 1024 * 79];
+//                            Arrays.fill(data, (char) 0x51);
+
+                            byte[] plain = new byte[1024 * 1024 * 64];
+                            Arrays.fill(plain, (byte) 0x51);
 
                             long time = System.currentTimeMillis();
-                            byte[] encrypt = qtf.Encrypt(keyHandle, plain.getBytes(StandardCharsets.UTF_8));
+                            byte[] encrypt = qtf.Encrypt(keyHandle, plain);
                             long time_encrypt = System.currentTimeMillis();
-                            LogUtils.d("加密耗时：" + (time_encrypt - time) + "ms");
+                            LogUtils.d("加密耗时：" + (time_encrypt - time) / 1000 + "s");
                             byte[] decrypt = qtf.Decrypt(keyHandle, encrypt);
                             long time_decrypt = System.currentTimeMillis();
-                            LogUtils.d("解密耗时：" + (time_decrypt - time_encrypt) + "ms");
-                            LogUtils.d("总耗时：" + (time_decrypt - time) + "ms");
+                            LogUtils.d("解密耗时：" + (time_decrypt - time_encrypt) / 1000 + "s");
+                            LogUtils.d("总耗时：" + (time_decrypt - time) / 1000 + "s");
 
-                            LogUtils.d("结果：" + new String(decrypt, StandardCharsets.UTF_8));
+//                            LogUtils.d("结果：" + new String(decrypt, StandardCharsets.UTF_8));
 
                             qtf.KeyFinal(keyHandle);
 
