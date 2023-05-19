@@ -414,41 +414,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
-
-    public void TEST(View view) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (qtf.enumDevice(getPackageName())) {
-                            if (qtf.loginDevice()) {
-                                if (qtf.initResource()) {
-                                    byte[] key = "1234567890123456".getBytes();
-                                    long keyHandle = qtf.importExternalSessionKey(key);
-
-                                    String plain = new String(new char[1024 * 1]).replace("\0", "Q");
-
-                                    byte[] encrypt = qtf.encrypt(keyHandle, plain.getBytes(StandardCharsets.UTF_8));
-                                    byte[] decrypt = qtf.decrypt(keyHandle, encrypt);
-
-                                    LogUtils.d(new String(decrypt, StandardCharsets.UTF_8));
-
-                                    qtf.freeKeyHandle(keyHandle);
-
-                                    qtf.updateResource();
-                                    qtf.destroyResource();
-                                }
-                                qtf.loginDevice();
-                            }
-                            qtf.freeDevices();
-                        }
-                    }
-                }).start();
-
-            }
-        }).start();
-    }
 }
