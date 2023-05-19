@@ -18,13 +18,6 @@
             android:text="CTS协商充注密钥" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/CTSNegoOLQKey"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="CTSNegoOLQKey"
-            android:text="CTS协商在线密钥" />
-
-        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/CTSNegoOLBizQKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

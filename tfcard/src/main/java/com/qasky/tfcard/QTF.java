@@ -177,17 +177,6 @@ public class QTF {
      */
     public native byte[] ExportKey(long keyHandle, long keyLen);
 
-
-    public native boolean SetServerAuthorizeKey(String visitKey, String protectKey);
-    public native long CreateSecTunnel(String host, String qccsId, String id);
-    public native void DestroySecTunnel(long secTunnelHandle);
-    public native String GetLinkId(long secTunnelHandle, String storeId, String qccsId);
-    public native OLNegoInfo ServerProxyRequestQkey(long secTunnelHandle, String storeId, String linkId, String systemId);
-    public native byte[] ReadQKey(long secTunnelHandle, String keyId);
-    public native long DeviceQKeyHandlesInit(String qccsId, String systemId, String pin, byte[] flagChkV, String flag, int encKey, byte[] cipherQKey, int cipherQKeyLen);
-    public native void DestroyDeviceKeyHandles();
-    public native byte[] ClientGetQkey(String qccsId, String systemId, String pin, byte[] flagChkV, String flag, int encKey, byte[] cipherQKey, int cipherQKeyLen);
-
     /**
      * 协商在线业务密钥
      *

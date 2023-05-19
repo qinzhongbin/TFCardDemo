@@ -173,57 +173,6 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    public void CTSNegoOLQKey(View view) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (qtf.EnumStoreHandle(getPackageName())) {
-                        if (qtf.Login()) {
-                            if (qtf.InitResource()) {
-                                String storeId = qtf.GetStoreId();
-                                int keyLength = qtf.QueryKey(storeId, "QTFCTS", "QTFCTS");
-                                qtf.ProxyOnlineChargingKey("112.27.97.202", "QTFCTS", "QTFCTS", "12222222", 16);
-                                String systemId = qtf.GetSystemId("QTFCTS", "QTFCTS");
-
-                                // 服务端代理协商
-                                qtf.SetServerAuthorizeKey("JLz3wNv1g8cTbiOBMaE+xl+lEzvqeqYKghYk+rJZxAa8c+Aq8VCeMxi7u0a7vaHVWOjuePeXoM7JFEeAZy64xA==", "123456");
-                                long secTunnelHandle = qtf.CreateSecTunnel("112.27.97.202:18895", "WT-QRMS100-20201116", "WT-QKMS100_001");
-                                String linkId = qtf.GetLinkId(secTunnelHandle, storeId, "WT-QRMS100-20201116");
-                                OLNegoInfo olNegoInfo = qtf.ServerProxyRequestQkey(secTunnelHandle, storeId, linkId, systemId);
-                                byte[] serverQKey = qtf.ReadQKey(secTunnelHandle, olNegoInfo.getKeyId());
-                                LogUtils.d("服务端软密钥：" + ConvertUtils.bytes2HexString(serverQKey));
-                                byte[] cipher = SM4Util.encrypt_CBC_Padding(serverQKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
-
-                                // 客户端读密钥
-                                if (olNegoInfo.getEncKey() == 1) {
-                                    byte[] clientQKey = qtf.ClientGetQkey("WT-QRMS100-20201116", systemId, "12222222", olNegoInfo.getFlagChkV(), olNegoInfo.getFlag(), olNegoInfo.getEncKey(), olNegoInfo.getCipherQKey(), olNegoInfo.getCipherQKeyLen());
-                                    LogUtils.d("客户端软密钥：" + ConvertUtils.bytes2HexString(clientQKey));
-                                    byte[] plain = SM4Util.decrypt_CBC_Padding(clientQKey, zeroIV, cipher);
-                                    LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
-                                } else {
-                                    long keyHandle = qtf.DeviceQKeyHandlesInit("WT-QRMS100-20201116", systemId, "12222222", olNegoInfo.getFlagChkV(), olNegoInfo.getFlag(), olNegoInfo.getEncKey(), olNegoInfo.getCipherQKey(), olNegoInfo.getCipherQKeyLen());
-                                    byte[] plain = qtf.Decrypt(keyHandle, cipher);
-                                    LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
-                                }
-
-                                qtf.DestroyDeviceKeyHandles();
-                                qtf.DestroySecTunnel(secTunnelHandle);
-
-                                qtf.UpdateResource();
-                                qtf.DestroyResource();
-                            }
-                            qtf.Logout();
-                        }
-                        qtf.FreeStoreHandle();
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
     public void CTSNegoOLBizQKey(View view) {
         new Thread(new Runnable() {
             @Override
