@@ -155,7 +155,7 @@ public class ExtSyncQKeykInfoDto {
 
     // 转化为原始顺序的json（gson会自动按字母顺序排序）
     public String toOriginalOrderJson() {
-        Gson gson = new GsonBuilder().registerTypeAdapter(ExtSyncQKeykInfoDto.class, new TypeAdapter<ExtSyncQKeykInfoDto>() {
+        Gson gson = new GsonBuilder().disableHtmlEscaping().registerTypeAdapter(ExtSyncQKeykInfoDto.class, new TypeAdapter<ExtSyncQKeykInfoDto>() {
             @Override
             public void write(JsonWriter out, ExtSyncQKeykInfoDto value) throws IOException {
                 out.beginObject();

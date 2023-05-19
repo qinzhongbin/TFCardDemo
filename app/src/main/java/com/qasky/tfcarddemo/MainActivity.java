@@ -138,6 +138,8 @@ public class MainActivity extends AppCompatActivity {
                                         LogUtils.d("服务端软密钥：" + ConvertUtils.bytes2HexString(softQkey)); // 客户端导出软密钥对比是否与服务端一致
                                         LogUtils.d("CTS密钥协商成功");
 
+                                        LogUtils.d(data.getCheckCode());
+                                        LogUtils.d(data.getFlag().toOriginalOrderJson());
                                         long keyHandle = qtf.ClientKeyInit("QTFCTS", "QTFCTS", "12222222", data.getCheckCode(), data.getFlag().toOriginalOrderJson());
 
                                         byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
