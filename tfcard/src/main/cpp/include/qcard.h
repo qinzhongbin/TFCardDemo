@@ -1088,7 +1088,6 @@ QCARD_API int QCard_ClientGetQkey(QHANDLE hStoreHandle, char* pcQccsId, char* pc
 * @ pcPin[in]:系统PIN码
 * @ pucFlagChkV[in]:鉴别信息
 * @ pcFlag[in]:密钥协商flag
-* @ iEncKey[in]:密钥加密类型 0公钥加密 1未加密 2对称密钥加密
 * @ pucCiphreQKey[in]:密文密钥
 * @ uiCiphreQKeyLen[in]:密文密钥长度
 * @ uiPlainKeyLen[in]:明文密钥长度（单位为字节）
@@ -1100,7 +1099,8 @@ QCARD_API int QCard_ClientGetDeviceQkey(QHANDLE hStoreHandle, char* pcQccsId, ch
                                         DEVQKEYPARAM* pDevQkeyParam, unsigned int* puiKeyNum);
 
 
-/*******************************************************************************
+/******************************************************************************** @ iEncKey[in]:密钥加密类型 0公钥加密 1未加密 2对称密钥加密
+
 * Function Name  : QCard_KeyToConVerifyPIN
 * Description    : 校验PIN, 当使用三级密钥体系进行充注密钥后，QCard_KeyInit函数运行前需要进行校验PIN
 * Input          : hStoreHandle       : 安全存储区句柄

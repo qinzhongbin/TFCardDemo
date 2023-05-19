@@ -1,32 +1,28 @@
 package com.qasky.tfcarddemo;
 
-import static com.qasky.tfcarddemo.App.LOG_TAG;
-
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.LinearLayoutCompat;
 
 import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.LogUtils;
-import com.blankj.utilcode.util.StringUtils;
 import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.reflect.TypeToken;
 import com.qasky.tfcard.NegotiateInfo;
+import com.qasky.tfcard.OLNegoInfo;
 import com.qasky.tfcard.QTF;
+import com.qasky.tfcarddemo.dto.AgreementFillQKeyRequest;
+import com.qasky.tfcarddemo.dto.AgreementFillQKeyResponse;
 import com.qasky.tfcarddemo.dto.CleanOLBizKeyReq;
 import com.qasky.tfcarddemo.dto.CleanOLBizKeyResp;
 import com.qasky.tfcarddemo.dto.CreateOLBizKeyReq;
 import com.qasky.tfcarddemo.dto.CreateOLBizKeyResp;
 import com.qasky.tfcarddemo.dto.ExtServerConsultInfo;
+import com.qasky.tfcarddemo.dto.ProxyAgreementQKeyRequest;
+import com.qasky.tfcarddemo.dto.ProxyAgreementQKeyResponse;
 import com.qasky.tfcarddemo.dto.RestResult;
 import com.qasky.tfcarddemo.dto.SvrNegoOLBizKeyReq;
 import com.qasky.tfcarddemo.dto.SvrNegoOLBizKeyResp;
@@ -41,11 +37,8 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -59,21 +52,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-    String appName = "QTFCTS";
-    String conName = "QTFCTS";
-    String pin = "12222222";
-    String host = "112.27.97.202:8890";
-    int softKeyLen = 16;
-
-    String keyAppSvrId = "WT-QKMS100_001";
-    String protectKey = "123456";
-    String secAuthKey = "JLz3wNv1g8cTbiOBMaE+xl+lEzvqeqYKghYk+rJZxAa8c+Aq8VCeMxi7u0a7vaHVWOjuePeXoM7JFEeAZy64xA==";
-    byte[] zeroIV = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    byte[] encryptKey;
-    byte[] decryptKey;
-    byte[] hmacKey;
-
-    private QTF qtf = new QTF();
+    private final QTF qtf = new QTF();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,11 +62,16 @@ public class MainActivity extends AppCompatActivity {
         init();
     }
 
+    byte[] zeroIV = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    byte[] encryptKey;
+    byte[] decryptKey;
+    byte[] hmacKey;
+
     private void init() {
-        byte[] cutProtectKey = Arrays.copyOfRange(SM3Util.hash(protectKey.getBytes(StandardCharsets.UTF_8)), 0, 16);
+        byte[] cutProtectKey = Arrays.copyOfRange(SM3Util.hash("123456".getBytes(StandardCharsets.UTF_8)), 0, 16);
         byte[] keys = new byte[0];
         try {
-            keys = SM4Util.decrypt_CBC_Padding(cutProtectKey, zeroIV, Base64.decode(secAuthKey.getBytes(StandardCharsets.UTF_8)));
+            keys = SM4Util.decrypt_CBC_Padding(cutProtectKey, zeroIV, Base64.decode("JLz3wNv1g8cTbiOBMaE+xl+lEzvqeqYKghYk+rJZxAa8c+Aq8VCeMxi7u0a7vaHVWOjuePeXoM7JFEeAZy64xA==".getBytes(StandardCharsets.UTF_8)));
         } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
@@ -97,57 +81,38 @@ public class MainActivity extends AppCompatActivity {
         hmacKey = Arrays.copyOfRange(keys, 32, 48);
     }
 
-    public void expDevInfo(View view) {
-        String deviceId = qtf.getDeviceId();
-        LogUtils.d("设备id：" + deviceId);
+    OkHttpClient okHttpClient = OkHttpUtil.getClient();
 
-        byte[] encCert = qtf.exportCert(0, appName, conName);
-        String encCertPem = new String(encCert, StandardCharsets.UTF_8);
-        Log.d(LOG_TAG, "加密证书：\n" + encCertPem);
-
-        byte[] signCert = qtf.exportCert(1, appName, conName);
-        String signCertPem = new String(signCert, StandardCharsets.UTF_8);
-        Log.d(LOG_TAG, "签名证书：\n" + signCertPem);
-
-        byte[] encPubKey = qtf.exportPubKey(0, appName, conName);
-        String encPubKeyPem = new String(encPubKey, StandardCharsets.UTF_8);
-        Log.d(LOG_TAG, "加密公钥：\n" + encPubKeyPem);
-
-        byte[] signPubKey = qtf.exportPubKey(1, appName, conName);
-        String signPubKeyPem = new String(signPubKey, StandardCharsets.UTF_8);
-        Log.d(LOG_TAG, "签名公钥：\n" + signPubKeyPem);
-    }
-
-    public void CTSNegoFillQKey(View view) {
+    public void CTSNegoChargingKey(View view) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    if (qtf.enumDevice(getPackageName())) {
-                        if (qtf.loginDevice()) {
-                            if (qtf.initResource()) {
-                                String deviceId = qtf.getDeviceId();
-                                int keyLength = qtf.queryKeyLength(deviceId, appName, conName);
-                                qtf.chargeKey(host, appName, conName, pin, 16);
+                    if (qtf.EnumStoreHandle(getPackageName())) {
+                        if (qtf.Login()) {
+                            if (qtf.InitResource()) {
+                                String storeId = qtf.GetStoreId();
+                                int keyLength = qtf.QueryKey(storeId, "QTFCTS", "QTFCTS");
+                                qtf.ProxyOnlineChargingKey("112.27.97.202", "QTFCTS", "QTFCTS", "12222222", 16);
 
                                 // 协商
                                 String timestamp = String.valueOf(System.currentTimeMillis());
-                                String authMsg = deviceId + "," + appName + "," + conName + "," + softKeyLen + "," + keyAppSvrId + "," + timestamp;
+                                String authMsg = storeId + "," + "QTFCTS" + "," + "QTFCTS" + "," + 16 + "," + "WT-QKMS100_001" + "," + timestamp;
                                 String hmac = Base64.toBase64String(SM3Util.hmac(hmacKey, authMsg.getBytes(StandardCharsets.UTF_8)));
                                 Request request = new Request.Builder()
-                                        .url("https://" + host + "/qkeyapply/serverConsultInfosByApp")
+                                        .url("https://112.27.97.202:8890/qkeyapply/serverConsultInfosByApp")
                                         .post(new FormBody.Builder()
-                                                .add("storeId", deviceId)
-                                                .add("appName", appName)
-                                                .add("containerName", conName)
-                                                .add("keyLen", String.valueOf(softKeyLen))
-                                                .add("serverId", keyAppSvrId)
+                                                .add("storeId", storeId)
+                                                .add("appName", "QTFCTS")
+                                                .add("containerName", "QTFCTS")
+                                                .add("keyLen", "16")
+                                                .add("serverId", "WT-QKMS100_001")
                                                 .add("timestamp", timestamp)
                                                 .add("hmac", hmac)
                                                 .build())
                                         .build();
 
-                                Response response = OkHttpUtil.getClient().newCall(request).execute();
+                                Response response = okHttpClient.newCall(request).execute();
                                 if (response.isSuccessful()) {
                                     RestResult<ExtServerConsultInfo> restResult = GsonUtils.fromJson(response.body().string(), new TypeToken<RestResult<ExtServerConsultInfo>>() {
                                     }.getType());
@@ -170,21 +135,23 @@ public class MainActivity extends AppCompatActivity {
                                         } else {
                                             softQkey = softQkey_encrypted;
                                         }
-                                        LogUtils.d("服务端软密钥：0x" + ConvertUtils.bytes2HexString(softQkey)); // 客户端导出软密钥对比是否与服务端一致
+                                        LogUtils.d("服务端软密钥：" + ConvertUtils.bytes2HexString(softQkey)); // 客户端导出软密钥对比是否与服务端一致
                                         LogUtils.d("CTS密钥协商成功");
 
-                                        long keyHandle = qtf.getKeyHandle(appName, conName, pin, data.getCheckCode(), data.getFlag().toOriginalOrderJson());
-                                        byte[] cipher = qtf.encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
-                                        byte[] plain = qtf.decrypt(keyHandle, cipher);
-                                        LogUtils.d(new String(plain, StandardCharsets.UTF_8));
+                                        long keyHandle = qtf.ClientKeyInit("QTFCTS", "QTFCTS", "12222222", data.getCheckCode(), data.getFlag().toOriginalOrderJson());
 
-                                        byte[] softKey = qtf.getSoftKey(keyHandle, softKeyLen);
+                                        byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+                                        byte[] plain = qtf.Decrypt(keyHandle, cipher);
+                                        LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
+
+                                        byte[] softKey = qtf.ExportKey(keyHandle, 16);
                                         LogUtils.d("客户端软密钥：" + ConvertUtils.bytes2HexString(softKey));
+
                                         cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
                                         plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
-                                        LogUtils.d(new String(plain, StandardCharsets.UTF_8));
+                                        LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
 
-                                        qtf.freeKeyHandle(keyHandle);
+                                        qtf.KeyFinal(keyHandle);
                                     } else {
                                         LogUtils.d(restResult.getMessage());
                                     }
@@ -192,12 +159,12 @@ public class MainActivity extends AppCompatActivity {
                                     LogUtils.d(response.message());
                                 }
 
-                                qtf.updateResource();
-                                qtf.destroyResource();
+                                qtf.UpdateResource();
+                                qtf.DestroyResource();
                             }
-                            qtf.logoutDevice();
+                            qtf.Logout();
                         }
-                        qtf.freeDevices();
+                        qtf.FreeStoreHandle();
                     }
                 } catch (Throwable e) {
                     e.printStackTrace();
@@ -207,9 +174,245 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void CTSNegoOLQKey(View view) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (qtf.EnumStoreHandle(getPackageName())) {
+                        if (qtf.Login()) {
+                            if (qtf.InitResource()) {
+                                String storeId = qtf.GetStoreId();
+                                int keyLength = qtf.QueryKey(storeId, "QTFCTS", "QTFCTS");
+                                qtf.ProxyOnlineChargingKey("112.27.97.202", "QTFCTS", "QTFCTS", "12222222", 16);
+                                String systemId = qtf.GetSystemId("QTFCTS", "QTFCTS");
+
+                                // 服务端代理协商
+                                qtf.SetServerAuthorizeKey("JLz3wNv1g8cTbiOBMaE+xl+lEzvqeqYKghYk+rJZxAa8c+Aq8VCeMxi7u0a7vaHVWOjuePeXoM7JFEeAZy64xA==", "123456");
+                                long secTunnelHandle = qtf.CreateSecTunnel("112.27.97.202:18895", "WT-QRMS100-20201116", "WT-QKMS100_001");
+                                String linkId = qtf.GetLinkId(secTunnelHandle, storeId, "WT-QRMS100-20201116");
+                                OLNegoInfo olNegoInfo = qtf.ServerProxyRequestQkey(secTunnelHandle, storeId, linkId, systemId);
+                                byte[] serverQKey = qtf.ReadQKey(secTunnelHandle, olNegoInfo.getKeyId());
+                                LogUtils.d("服务端软密钥：" + ConvertUtils.bytes2HexString(serverQKey));
+                                byte[] cipher = SM4Util.encrypt_CBC_Padding(serverQKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+
+                                // 客户端读密钥
+                                if (olNegoInfo.getEncKey() == 1) {
+                                    byte[] clientQKey = qtf.ClientGetQkey("WT-QRMS100-20201116", systemId, "12222222", olNegoInfo.getFlagChkV(), olNegoInfo.getFlag(), olNegoInfo.getEncKey(), olNegoInfo.getCipherQKey(), olNegoInfo.getCipherQKeyLen());
+                                    LogUtils.d("客户端软密钥：" + ConvertUtils.bytes2HexString(clientQKey));
+                                    byte[] plain = SM4Util.decrypt_CBC_Padding(clientQKey, zeroIV, cipher);
+                                    LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
+                                } else {
+                                    long keyHandle = qtf.DeviceQKeyHandlesInit("WT-QRMS100-20201116", systemId, "12222222", olNegoInfo.getFlagChkV(), olNegoInfo.getFlag(), olNegoInfo.getEncKey(), olNegoInfo.getCipherQKey(), olNegoInfo.getCipherQKeyLen());
+                                    byte[] plain = qtf.Decrypt(keyHandle, cipher);
+                                    LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
+                                }
+
+                                qtf.DestroyDeviceKeyHandles();
+                                qtf.DestroySecTunnel(secTunnelHandle);
+
+                                qtf.UpdateResource();
+                                qtf.DestroyResource();
+                            }
+                            qtf.Logout();
+                        }
+                        qtf.FreeStoreHandle();
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public void CTSNegoOLBizQKey(View view) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (qtf.EnumStoreHandle(getPackageName())) {
+                        if (qtf.Login()) {
+                            if (qtf.InitResource()) {
+                                String storeId = qtf.GetStoreId();
+                                int keyLength = qtf.QueryKey(storeId, "QTFCTS", "QTFCTS");
+                                qtf.ProxyOnlineChargingKey("112.27.97.202", "QTFCTS", "QTFCTS", "12222222", 16);
+                                String systemId = qtf.GetSystemId("QTFCTS", "QTFCTS");
+
+                                // step 1: 服务端创建在线业务密钥
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.add(Calendar.YEAR, 1);
+                                CreateOLBizKeyReq createRequest = new CreateOLBizKeyReq();
+                                createRequest.setSecretSize("16");
+                                createRequest.setValidityDate(TimeUtils.date2String(calendar.getTime()));
+                                createRequest.setSystemId(systemId);
+                                createRequest.setServerId("WT-QKMS100_001");
+                                createRequest.setTimestamp(System.currentTimeMillis());
+                                String authMsg_create = createRequest.getSecretSize() + "," + createRequest.getValidityDate() + "," + createRequest.getSystemId() + "," + createRequest.getServerId() + "," + createRequest.getTimestamp();
+                                createRequest.setHmac(Base64.toBase64String(SM3Util.hmac(hmacKey, authMsg_create.getBytes(StandardCharsets.UTF_8))));
+
+                                Response response_create = okHttpClient.newCall(new Request.Builder()
+                                        .url("https://112.27.97.202:8890/onlinebizkey/createOnlineBizKey")
+                                        .post(RequestBody.create(GsonUtils.toJson(createRequest), MediaType.parse("application/json; charset=utf-8")))
+                                        .build()).execute();
+                                if (response_create.isSuccessful()) {
+                                    CreateOLBizKeyResp createOLBizKeyResp = GsonUtils.fromJson(response_create.body().string(), CreateOLBizKeyResp.class);
+                                    if (createOLBizKeyResp.getCode() == 0) {
+                                        String secretId = createOLBizKeyResp.getData().getSecretId();
+
+                                        // step 2: 服务端协商在线业务密钥
+                                        SvrNegoOLBizKeyReq svrNegoReq = new SvrNegoOLBizKeyReq();
+                                        svrNegoReq.setSecretId(secretId);
+                                        svrNegoReq.setSystemId(systemId);
+                                        svrNegoReq.setServerId("WT-QKMS100_001");
+                                        svrNegoReq.setTimestamp(String.valueOf(System.currentTimeMillis()));
+                                        String authMsg_svrNego = svrNegoReq.getSecretId() + "," + svrNegoReq.getSystemId() + "," + svrNegoReq.getServerId() + "," + svrNegoReq.getTimestamp();
+                                        svrNegoReq.setHmac(Base64.toBase64String(SM3Util.hmac(hmacKey, authMsg_svrNego.getBytes(StandardCharsets.UTF_8))));
+                                        Response response_svrNego = okHttpClient.newCall(new Request.Builder()
+                                                .url("https://112.27.97.202:8890/onlinebizkey/serverNegotiateOnlineBizKey")
+                                                .post(RequestBody.create(GsonUtils.toJson(svrNegoReq), MediaType.parse("application/json; charset=utf-8")))
+                                                .build()).execute();
+                                        if (response_svrNego.isSuccessful()) {
+                                            SvrNegoOLBizKeyResp srvNegoResponse = GsonUtils.fromJson(response_svrNego.body().string(), SvrNegoOLBizKeyResp.class);
+                                            if (srvNegoResponse.getCode() == 0) {
+                                                String secretKey_encrypted_encoded = srvNegoResponse.getData().getSecretKey();
+                                                byte[] secretKey_encrypted = Base64.decode(secretKey_encrypted_encoded);
+                                                byte[] secretKey = SM4Util.decrypt_CBC_Padding(decryptKey, zeroIV, secretKey_encrypted);
+                                                LogUtils.d("服务端软密钥：" + ConvertUtils.bytes2HexString(secretKey));
+
+                                                // step 3: 客户端协商在线业务密钥
+                                                Thread.sleep(1000L); // 客户端协商时间应比服务端协商时间晚，模拟延时操作。
+                                                NegotiateInfo negotiateInfo = qtf.ClientRequestOnlineBizKey("112.27.97.202:8890", storeId, systemId, secretId, "WT-QKMS100_001", "JLz3wNv1g8cTbiOBMaE+xl+lEzvqeqYKghYk+rJZxAa8c+Aq8VCeMxi7u0a7vaHVWOjuePeXoM7JFEeAZy64xA==", "123456");
+
+                                                long keyHandle = qtf.ClientKeyInit("QTFCTS", "QTFCTS", "12222222", negotiateInfo.getCheckCode(), negotiateInfo.getFlag());
+
+                                                byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+                                                byte[] plain = qtf.Decrypt(keyHandle, cipher);
+                                                LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
+
+                                                byte[] softKey = qtf.ExportKey(keyHandle, 16);
+                                                LogUtils.d("客户端软密钥：" + ConvertUtils.bytes2HexString(softKey));
+
+                                                cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+                                                plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
+                                                LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
+
+                                                qtf.KeyFinal(keyHandle);
+
+                                                // step 4: 服务端销毁在线业务密钥 (业务结束后调用)
+                                                CleanOLBizKeyReq cleanRequest = new CleanOLBizKeyReq();
+                                                cleanRequest.setSecretId(secretId);
+                                                cleanRequest.setSystemId(systemId);
+                                                cleanRequest.setServerId("WT-QKMS100_001");
+                                                cleanRequest.setTimestamp(String.valueOf(System.currentTimeMillis()));
+                                                String authMsg_clean = cleanRequest.getSecretId() + "," + cleanRequest.getSystemId() + "," + cleanRequest.getServerId() + "," + cleanRequest.getTimestamp();
+                                                cleanRequest.setHmac(Base64.toBase64String(SM3Util.hmac(hmacKey, authMsg_clean.getBytes(StandardCharsets.UTF_8))));
+                                                Response response_clean = okHttpClient.newCall(new Request.Builder()
+                                                        .url("https://112.27.97.202:8890/onlinebizkey/cleanNegotiateOnlineBizKey")
+                                                        .post(RequestBody.create(GsonUtils.toJson(cleanRequest), MediaType.parse("application/json; charset=utf-8"))).build()).execute();
+                                                if (response_clean.isSuccessful()) {
+                                                    CleanOLBizKeyResp cleanResponse = GsonUtils.fromJson(response_clean.body().string(), CleanOLBizKeyResp.class);
+                                                    if (cleanResponse.getCode() == 0) {
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                qtf.UpdateResource();
+                                qtf.DestroyResource();
+                            }
+                            qtf.Logout();
+                        }
+                        qtf.FreeStoreHandle();
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    public void CTCNego(View view) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (qtf.EnumStoreHandle(getPackageName())) {
+                    if (qtf.Login()) {
+                        if (qtf.InitResource()) {
+                            String storeId = qtf.GetStoreId();
+                            String systemId = qtf.GetSystemId("QTFCTC", "QTFCTC");
+                            int keyLen = qtf.QueryKey(storeId, "QTFCTC", "QTFCTC");
+
+                            String authSynFlag = qtf.ReadAuthSynFlag("", "QTFCTC", "QTFCTC", "12222222");
+                            if (qtf.AuthSynFlag("", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
+                                long keyHandle = qtf.AuthSynFlagKeyInit("", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
+
+                                byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+                                byte[] plain = qtf.Decrypt(keyHandle, cipher);
+                                LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
+
+                                byte[] softKey = qtf.ExportKey(keyHandle, 16);
+                                LogUtils.d("软密钥：" + ConvertUtils.bytes2HexString(softKey));
+                                try {
+                                    cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+                                    plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
+                                } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                                LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
+
+                                qtf.KeyFinal(keyHandle);
+                            }
+                            qtf.UpdateResource();
+                            qtf.DestroyResource();
+                        }
+                        qtf.Logout();
+                    }
+                    qtf.FreeStoreHandle();
+                }
+            }
+        }).start();
+    }
+
+    public void TEST(View view) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (qtf.EnumStoreHandle(getPackageName())) {
+                    if (qtf.Login()) {
+                        if (qtf.InitResource()) {
+                            byte[] key = "1234567890123456".getBytes();
+                            long keyHandle = qtf.ExternalKeyInit(key);
+
+//                            String plain = new String(new char[1024 * 1024 * 100]).replace("\0", "Q");
+//                            char[] data = new char[1024 * 1024 * 79];
+//                            Arrays.fill(data, (char) 0x51);
+
+                            byte[] plain = new byte[1024 * 1024 * 64];
+                            Arrays.fill(plain, (byte) 0x51);
+
+                            long time = System.currentTimeMillis();
+                            byte[] encrypt = qtf.Encrypt(keyHandle, plain);
+                            long time_encrypt = System.currentTimeMillis();
+                            LogUtils.d("加密耗时：" + (time_encrypt - time) / 1000 + "s");
+                            byte[] decrypt = qtf.Decrypt(keyHandle, encrypt);
+                            long time_decrypt = System.currentTimeMillis();
+                            LogUtils.d("解密耗时：" + (time_decrypt - time_encrypt) / 1000 + "s");
+                            LogUtils.d("总耗时：" + (time_decrypt - time) / 1000 + "s");
+
+//                            LogUtils.d("结果：" + new String(decrypt, StandardCharsets.UTF_8));
+
+                            qtf.KeyFinal(keyHandle);
+
+                            qtf.UpdateResource();
+                            qtf.DestroyResource();
+                        }
+                        qtf.Login();
+                    }
+                    qtf.FreeStoreHandle();
+                }
+            }
+        }).start();
     }
 
     public void TEST(View view) {
