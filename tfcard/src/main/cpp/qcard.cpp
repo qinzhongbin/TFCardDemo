@@ -875,6 +875,12 @@ Java_com_qasky_tfcard_QTF_test(JNIEnv *env, jobject thiz) {
     BLOCKCIPHERPARAM bp;
 //        getSzDevName();
 
+    int i;
+    u8 *d1 = (u8 *)malloc(100*1024*1024);
+    u32 d1Len = 0;
+    u8 *d2 = (u8 *)malloc(100*1024*1024+16);
+    u32 d2Len = 0;
+    int peer_encrypt_len = 1024*100;
     sd_SetPackageName("com.qasky.tfcarddemo");
     V_SetAppPath("Android/data/com.qasky.tfcarddemo");
 
@@ -928,11 +934,17 @@ Java_com_qasky_tfcard_QTF_test(JNIEnv *env, jobject thiz) {
         LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
         goto end;
     }
+    ret = SKF_SetSymmKey(g_hdev, (u8 *) "1234567812345678", SGD_SMS4_CBC, &g_hKey1);
+    if (ret) {
+        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+        goto end;
+    }
+
 
     memset(&bp, 0x0, sizeof(bp));
 
     bp.IVLen = 0;
-    bp.PaddingType = 0;
+    bp.PaddingType = 1;
     bp.FeedBitLen = 0;
 
     //初始化解密句柄
@@ -942,62 +954,51 @@ Java_com_qasky_tfcard_QTF_test(JNIEnv *env, jobject thiz) {
         goto end;
     }
 
-    ulEncryptedLen = 4096;
-    ret = SKF_Encrypt(g_hKey, key, 16, outenc, reinterpret_cast<u32 *>(&ulEncryptedLen));
+    ret = SKF_DecryptInit(g_hKey1, bp);
     if (ret) {
         LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
         goto end;
     }
 
-    //校验用户pin码
-    ret = SKF_VerifyPIN(happ, USER_TYPE, "12222222", reinterpret_cast<u32 *>(&trytimes));
-    if (ret) {
-        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
-        goto end;
-    }
-
-    ret = SKF_CUSTOM_ImportSessionKey(hcon, SGD_SMS4_CBC, SGD_SMS4_CBC, outenc, 16, &g_hKey1);
-    if (ret) {
-        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
-        goto end;
-    }
-    SKF_CloseHandle(g_hKey);
-
-
-    bp.PaddingType = 1;
-    ret = SKF_EncryptInit(g_hKey1, bp);
-    if (ret) {
-        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
-        goto end;
-    }
-
-
-    ret = SKF_Encrypt(g_hKey1, plain, strlen(reinterpret_cast<const char *const>(plain)), outenc, reinterpret_cast<u32 *>(&ulEncryptedLen));
-    if (ret) {
-        LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
-        goto end;
-    }
-
+    for(i = 01; i < 100*1024*1024; i++)
     {
-        int z;
-        unsigned char *p;
-        p = (unsigned char *) outenc;
-        LOGD("\n%s %d \n", __FUNCTION__, __LINE__);
-        for (z = 1; z <= ulEncryptedLen; z++) {
-
-            LOGD("%02x ", p[z - 1]);
-            if (z % 16 == 0) {
-                LOGD("\n");
-            }
-        }
-        LOGD("\n");
+        d1[i] = i;
     }
 
-    SKF_CloseHandle(g_hKey1);
 
-    end:
+    for(i = 1; i* peer_encrypt_len< 100*1024*1024; i++)
+    {
+        LOGD("%s %d cur encrypt data len is  %u \n", __FUNCTION__, __LINE__, i*peer_encrypt_len);
+        d2Len = 100*1024*1024;
+        ret = SKF_Encrypt(g_hKey, reinterpret_cast<u8 *>(d1), i * peer_encrypt_len, reinterpret_cast<u8 *>(d2), reinterpret_cast<u32 *>(&d2Len));
+        if (ret) {
+            LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+            goto end;
+        }
+
+        d1Len = 100*1024*1024;
+        ret = SKF_Decrypt(g_hKey1, d2, d2Len, d1, &d1Len);
+        if (ret) {
+            LOGD("%s %d ret %x\n", __FUNCTION__, __LINE__, ret);
+            goto end;
+        }
+    }
 
 
+
+end:
+    if (d1) {
+        free(d1);
+    }
+    if (d2) {
+        free(d2);
+    }
+    if (g_hKey) {
+        SKF_CloseHandle(g_hKey);
+    }
+    if (g_hKey1) {
+        SKF_CloseHandle(g_hKey1);
+    }
     if (hcon) {
         SKF_CloseContainer(hcon);
     }
