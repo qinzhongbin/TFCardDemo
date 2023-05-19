@@ -153,9 +153,9 @@ public class ExtSyncQKeykInfoDto {
         this.errorMsg = errorMsg;
     }
 
-    // 转化为原始顺序的json（gson会自动按字母顺序排序）
+    // 转化为原始顺序的json（gson会自动按字母顺序排序且进行html escape转码）
     public String toOriginalOrderJson() {
-        Gson gson = new GsonBuilder().registerTypeAdapter(ExtSyncQKeykInfoDto.class, new TypeAdapter<ExtSyncQKeykInfoDto>() {
+        Gson gson = new GsonBuilder().disableHtmlEscaping().registerTypeAdapter(ExtSyncQKeykInfoDto.class, new TypeAdapter<ExtSyncQKeykInfoDto>() {
             @Override
             public void write(JsonWriter out, ExtSyncQKeykInfoDto value) throws IOException {
                 out.beginObject();

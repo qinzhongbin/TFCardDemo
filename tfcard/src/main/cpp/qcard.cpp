@@ -20,7 +20,7 @@ Java_com_qasky_tfcard_QTF_EnumStoreHandle(JNIEnv *env, jobject thiz, jstring pkg
     snprintf(appPath, 128, "%s%s", "Android/data/", pkgName);
 
     devHandles = nullptr;
-    int ret = QCard_EnumStoreHandle(&devHandles, pkgName, appPath);
+    int ret = QCard_Android_EnumStoreHandle(&devHandles, pkgName, appPath);
     LOGD("QCard_EnumStoreHandle ret = %X devHandles = %p", ret, devHandles);
 
     env->ReleaseStringUTFChars(pkg_name, pkgName);

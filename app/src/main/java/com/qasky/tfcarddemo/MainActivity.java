@@ -142,14 +142,14 @@ public class MainActivity extends AppCompatActivity {
 
                                         byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
                                         byte[] plain = qtf.Decrypt(keyHandle, cipher);
-                                        LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
+                                        LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
 
                                         byte[] softKey = qtf.ExportKey(keyHandle, 16);
                                         LogUtils.d("客户端软密钥：" + ConvertUtils.bytes2HexString(softKey));
 
                                         cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
                                         plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
-                                        LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
+                                        LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
 
                                         qtf.KeyFinal(keyHandle);
                                     } else {
