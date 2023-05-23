@@ -6,6 +6,8 @@ public class QTF {
         System.loadLibrary("QTF");
     }
 
+
+    public native void LogSetCallBack();
     /**
      * 枚举设备
      *

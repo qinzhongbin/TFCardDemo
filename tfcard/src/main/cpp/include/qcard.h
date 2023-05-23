@@ -20,6 +20,7 @@
 extern "C" {
 #endif
 
+QCARD_API void QCard_LogSetCallBack(void (*cb)(int level, char *msg), int lverror, int lvwarn, int lvinfo, int lvdebug, int lvtrace);
 
 /*******************************************************************************
 * Function Name  : QCard_EnumStoreHandle

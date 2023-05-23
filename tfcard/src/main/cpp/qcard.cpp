@@ -12,6 +12,17 @@
 QHANDLES devHandles = nullptr;
 QHANDLE devHandle = nullptr;
 
+
+void debug_print(int level, char *msg) {
+    LOGE("%d:%s", level, msg);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_qasky_tfcard_QTF_LogSetCallBack(JNIEnv *env, jobject thiz) {
+    QCard_LogSetCallBack(debug_print, 1, 2, 3, 4, 5);
+}
+
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_qasky_tfcard_QTF_EnumStoreHandle(JNIEnv *env, jobject thiz, jstring pkg_name) {
@@ -352,13 +363,13 @@ Java_com_qasky_tfcard_QTF_ReadAuthSynFlag(JNIEnv *env, jobject thiz, jstring pee
     char *pin = const_cast<char *>(env->GetStringUTFChars(_pin, JNI_FALSE));
 
     int ret = QCard_ReadAuthSynFlag(devHandle, peerStoreId, appName, conName, pin, syncFlag, &flagLen);
-    LOGE("QCard_ReadAuthSynFlag ret = %X", ret);
+    LOGD("QCard_ReadAuthSynFlag ret = %X flagLen = %d syncFlag = %s", ret, flagLen, syncFlag);
 
     syncFlag = (char *) malloc(flagLen);
     memset(syncFlag, 0, flagLen);
 
     ret = QCard_ReadAuthSynFlag(devHandle, peerStoreId, appName, conName, pin, syncFlag, &flagLen);
-    LOGE("QCard_ReadAuthSynFlag ret = %X", ret);
+    LOGD("QCard_ReadAuthSynFlag ret = %X flagLen = %d syncFlag = %s", ret, flagLen, syncFlag);
 
     env->ReleaseStringUTFChars(peer_store_id, peerStoreId);
     env->ReleaseStringUTFChars(app_name, appName);
