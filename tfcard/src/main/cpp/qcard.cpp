@@ -12,6 +12,17 @@
 QHANDLES devHandles = nullptr;
 QHANDLE devHandle = nullptr;
 
+
+void debug_print(int level, char *msg) {
+    LOGE("%d:%s", level, msg);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_qasky_tfcard_QTF_LogSetCallBack(JNIEnv *env, jobject thiz) {
+    QCard_LogSetCallBack(debug_print, 1, 2, 3, 4, 5);
+}
+
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_qasky_tfcard_QTF_EnumStoreHandle(JNIEnv *env, jobject thiz, jstring pkg_name) {
