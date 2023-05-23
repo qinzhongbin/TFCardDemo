@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                             if (qtf.InitResource()) {
                                 String storeId = qtf.GetStoreId();
                                 int keyLength = qtf.QueryKey(storeId, "QTFCTS", "QTFCTS");
-                                qtf.ProxyOnlineChargingKey("112.27.97.202", "QTFCTS", "QTFCTS", "12222222", 16);
+                                qtf.ProxyOnlineChargingKey("112.27.97.202:8890", "QTFCTS", "QTFCTS", "12222222", 16);
 
                                 // 协商
                                 String timestamp = String.valueOf(System.currentTimeMillis());
@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                             if (qtf.InitResource()) {
                                 String storeId = qtf.GetStoreId();
                                 int keyLength = qtf.QueryKey(storeId, "QTFCTS", "QTFCTS");
-                                qtf.ProxyOnlineChargingKey("112.27.97.202", "QTFCTS", "QTFCTS", "12222222", 16);
+                                qtf.ProxyOnlineChargingKey("112.27.97.202:8890", "QTFCTS", "QTFCTS", "12222222", 16);
                                 String systemId = qtf.GetSystemId("QTFCTS", "QTFCTS");
 
                                 // 服务端代理协商
@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
                             if (qtf.InitResource()) {
                                 String storeId = qtf.GetStoreId();
                                 int keyLength = qtf.QueryKey(storeId, "QTFCTS", "QTFCTS");
-                                qtf.ProxyOnlineChargingKey("112.27.97.202", "QTFCTS", "QTFCTS", "12222222", 16);
+                                qtf.ProxyOnlineChargingKey("112.27.97.202:8890", "QTFCTS", "QTFCTS", "12222222", 16);
                                 String systemId = qtf.GetSystemId("QTFCTS", "QTFCTS");
 
                                 // step 1: 服务端创建在线业务密钥
