@@ -538,13 +538,13 @@ Java_com_qasky_tfcard_QTF_ReadAuthSynFlag(JNIEnv *env, jobject thiz, jstring pee
     char *pin = const_cast<char *>(env->GetStringUTFChars(_pin, JNI_FALSE));
 
     int ret = QCard_ReadAuthSynFlag(devHandle, peerStoreId, appName, conName, pin, syncFlag, &flagLen);
-    LOGE("QCard_ReadAuthSynFlag ret = %X", ret);
+    LOGD("QCard_ReadAuthSynFlag ret = %X flagLen = %d syncFlag = %s", ret, flagLen, syncFlag);
 
     syncFlag = (char *) malloc(flagLen);
     memset(syncFlag, 0, flagLen);
 
     ret = QCard_ReadAuthSynFlag(devHandle, peerStoreId, appName, conName, pin, syncFlag, &flagLen);
-    LOGE("QCard_ReadAuthSynFlag ret = %X", ret);
+    LOGD("QCard_ReadAuthSynFlag ret = %X flagLen = %d syncFlag = %s", ret, flagLen, syncFlag);
 
     env->ReleaseStringUTFChars(peer_store_id, peerStoreId);
     env->ReleaseStringUTFChars(app_name, appName);
