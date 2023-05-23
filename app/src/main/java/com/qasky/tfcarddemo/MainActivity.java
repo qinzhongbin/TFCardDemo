@@ -294,24 +294,24 @@ public class MainActivity extends AppCompatActivity {
                             String systemId = qtf.GetSystemId("QTFCTC", "QTFCTC");
                             int keyLen = qtf.QueryKey(storeId, "QTFCTC", "QTFCTC");
 
-                            String authSynFlag = qtf.ReadAuthSynFlag("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
+//                            qtf.ReadAuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
 
-                            authSynFlag = "{\n" +
-                                    "\"checkCode\":\t\"keKRGGEwrX+EvPf55KanD18KHjmK56a64HELEPOq8xg=\",\n" +
-                                    "\"flag\":\t{\n" +
-                                    "\t\"storeId\":\t\"343048353201355DFFFFFFFF\",\n" +
-                                    "\t\"unitId\":\t\"aa525648d66946998ee61eb7976ae490\",\n" +
-                                    "\t\"blockId\":\t\"f3629cc4f7b745be9283ea36380e5f08\",\n" +
-                                    "\t\"offsetIndex\":\t0,\n" +
-                                    "\t\"encodeType\":\t\"SGD_SM1_ECB\",\n" +
-                                    "\t\"keyLen\":\t16,\n" +
-                                    "\t\"random\":\t\"4xVEn0S+ZyzO+1QrSYgonQ==\",\n" +
-                                    "\t\"code\":\t0,\n" +
-                                    "\t\"errorMsg\":\t\"\"\n" +
-                                    "}\n" +
+                            String authSynFlag = "{\n" +
+                                    "\t\"checkCode\":\t\"CTykldomsVb1N5HiUeXbMDu7QGeshbVcr1hrn+iChvc=\",\n" +
+                                    "\t\"flag\":\t{\n" +
+                                    "\t\t\"storeId\":\t\"343048353201454EFFFFFFFF\",\n" +
+                                    "\t\t\"unitId\":\t\"aa525648d66946998ee61eb7976ae490\",\n" +
+                                    "\t\t\"blockId\":\t\"f3629cc4f7b745be9283ea36380e5f08\",\n" +
+                                    "\t\t\"offsetIndex\":\t0,\n" +
+                                    "\t\t\"encodeType\":\t\"SGD_SM1_ECB\",\n" +
+                                    "\t\t\"keyLen\":\t16,\n" +
+                                    "\t\t\"random\":\t\"up99cXOFBnMkhM2LupB7rg==\",\n" +
+                                    "\t\t\"code\":\t0,\n" +
+                                    "\t\t\"errorMsg\":\t\"\"\n" +
+                                    "\t}\n" +
                                     "}";
-                            if (qtf.AuthSynFlag("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
-                                long keyHandle = qtf.AuthSynFlagKeyInit("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
+                            if (qtf.AuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
+                                long keyHandle = qtf.AuthSynFlagKeyInit("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
 
                                 byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
                                 byte[] plain = qtf.Decrypt(keyHandle, cipher);
