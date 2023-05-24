@@ -293,43 +293,44 @@ public class MainActivity extends AppCompatActivity {
                             String storeId = qtf.GetStoreId();
                             String systemId = qtf.GetSystemId("QTFCTC", "QTFCTC");
                             int keyLen = qtf.QueryKey(storeId, "QTFCTC", "QTFCTC");
+                            qtf.QueryKey("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC");
 
-//                            qtf.ReadAuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
+                            qtf.ReadAuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
 
-                            String authSynFlag = "{\n" +
-                                    "\t\"checkCode\":\t\"CTykldomsVb1N5HiUeXbMDu7QGeshbVcr1hrn+iChvc=\",\n" +
-                                    "\t\"flag\":\t{\n" +
-                                    "\t\t\"storeId\":\t\"343048353201454EFFFFFFFF\",\n" +
-                                    "\t\t\"unitId\":\t\"aa525648d66946998ee61eb7976ae490\",\n" +
-                                    "\t\t\"blockId\":\t\"f3629cc4f7b745be9283ea36380e5f08\",\n" +
-                                    "\t\t\"offsetIndex\":\t0,\n" +
-                                    "\t\t\"encodeType\":\t\"SGD_SM1_ECB\",\n" +
-                                    "\t\t\"keyLen\":\t16,\n" +
-                                    "\t\t\"random\":\t\"up99cXOFBnMkhM2LupB7rg==\",\n" +
-                                    "\t\t\"code\":\t0,\n" +
-                                    "\t\t\"errorMsg\":\t\"\"\n" +
-                                    "\t}\n" +
-                                    "}";
-                            if (qtf.AuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
-                                long keyHandle = qtf.AuthSynFlagKeyInit("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
-
-                                byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
-                                byte[] plain = qtf.Decrypt(keyHandle, cipher);
-                                LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
-
-                                byte[] softKey = qtf.ExportKey(keyHandle, 16);
-                                LogUtils.d("软密钥：" + ConvertUtils.bytes2HexString(softKey));
-                                try {
-                                    cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
-                                    plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
-                                } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
-                                    throw new RuntimeException(e);
-                                }
-
-                                LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
-
-                                qtf.KeyFinal(keyHandle);
-                            }
+//                            String authSynFlag = "{\n" +
+//                                    "\t\"checkCode\":\t\"CTykldomsVb1N5HiUeXbMDu7QGeshbVcr1hrn+iChvc=\",\n" +
+//                                    "\t\"flag\":\t{\n" +
+//                                    "\t\t\"storeId\":\t\"343048353201454EFFFFFFFF\",\n" +
+//                                    "\t\t\"unitId\":\t\"aa525648d66946998ee61eb7976ae490\",\n" +
+//                                    "\t\t\"blockId\":\t\"f3629cc4f7b745be9283ea36380e5f08\",\n" +
+//                                    "\t\t\"offsetIndex\":\t0,\n" +
+//                                    "\t\t\"encodeType\":\t\"SGD_SM1_ECB\",\n" +
+//                                    "\t\t\"keyLen\":\t16,\n" +
+//                                    "\t\t\"random\":\t\"up99cXOFBnMkhM2LupB7rg==\",\n" +
+//                                    "\t\t\"code\":\t0,\n" +
+//                                    "\t\t\"errorMsg\":\t\"\"\n" +
+//                                    "\t}\n" +
+//                                    "}";
+//                            if (qtf.AuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
+//                                long keyHandle = qtf.AuthSynFlagKeyInit("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
+//
+//                                byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+//                                byte[] plain = qtf.Decrypt(keyHandle, cipher);
+//                                LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
+//
+//                                byte[] softKey = qtf.ExportKey(keyHandle, 16);
+//                                LogUtils.d("软密钥：" + ConvertUtils.bytes2HexString(softKey));
+//                                try {
+//                                    cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+//                                    plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
+//                                } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
+//                                    throw new RuntimeException(e);
+//                                }
+//
+//                                LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
+//
+//                                qtf.KeyFinal(keyHandle);
+//                            }
                             qtf.UpdateResource();
                             qtf.DestroyResource();
                         }
