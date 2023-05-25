@@ -292,48 +292,33 @@ public class MainActivity extends AppCompatActivity {
                         if (qtf.InitResource()) {
                             String storeId = qtf.GetStoreId();
                             String systemId = qtf.GetSystemId("QTFCTC", "QTFCTC");
-                            int keyLen = qtf.QueryKey(storeId, "QTFCTC", "QTFCTC");
-                            qtf.QueryKey("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC");
+                            qtf.QueryKey("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC");
 
 
+                            String authSynFlag = qtf.ReadAuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
 
-                            String authSynFlag = "{\n" +
-                                    "                                                                                                    \t\"checkCode\":\t\"FR2KqRzhFvtigFWAMjq+uF70HlLmZEPC5AzmvizFTSA=\",\n" +
-                                    "                                                                                                    \t\"flag\":\t{\n" +
-                                    "                                                                                                    \t\t\"storeId\":\t\"343048353201355DFFFFFFFF\",\n" +
-                                    "                                                                                                    \t\t\"unitId\":\t\"cac7de1bdb054176bd94d3e6b7ddf1cb\",\n" +
-                                    "                                                                                                    \t\t\"blockId\":\t\"3cf74c95cac44548ab24d03a63b6db03\",\n" +
-                                    "                                                                                                    \t\t\"offsetIndex\":\t32,\n" +
-                                    "                                                                                                    \t\t\"encodeType\":\t\"SGD_SM1_ECB\",\n" +
-                                    "                                                                                                    \t\t\"keyLen\":\t16,\n" +
-                                    "                                                                                                    \t\t\"random\":\t\"Ap/A49JbgMCYIHOpC8oUfg==\",\n" +
-                                    "                                                                                                    \t\t\"code\":\t0,\n" +
-                                    "                                                                                                    \t\t\"errorMsg\":\t\"\"\n" +
-                                    "                                                                                                    \t}\n" +
-                                    "                                                                                                    }";
-                            if (qtf.AuthSynFlag("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
+//                            if (qtf.AuthSynFlag("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
 
-                                authSynFlag = qtf.ReadAuthSynFlag("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
 
-                                long keyHandle = qtf.AuthSynFlagKeyInit("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
+                            long keyHandle = qtf.AuthSynFlagKeyInit("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
 
-                                byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
-                                byte[] plain = qtf.Decrypt(keyHandle, cipher);
-                                LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
+                            byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+                            byte[] plain = qtf.Decrypt(keyHandle, cipher);
+                            LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
 
-                                byte[] softKey = qtf.ExportKey(keyHandle, 16);
-                                LogUtils.d("软密钥：" + ConvertUtils.bytes2HexString(softKey));
-                                try {
-                                    cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
-                                    plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
-                                } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
-                                    throw new RuntimeException(e);
-                                }
-
-                                LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
-
-                                qtf.KeyFinal(keyHandle);
+                            byte[] softKey = qtf.ExportKey(keyHandle, 16);
+                            LogUtils.d("软密钥：" + ConvertUtils.bytes2HexString(softKey));
+                            try {
+                                cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+                                plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
+                            } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
+                                throw new RuntimeException(e);
                             }
+
+                            LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
+
+                            qtf.KeyFinal(keyHandle);
+//                            }
                             qtf.UpdateResource();
                             qtf.DestroyResource();
                         }

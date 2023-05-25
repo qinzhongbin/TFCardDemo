@@ -410,7 +410,7 @@ Java_com_qasky_tfcard_QTF_AuthSynFlagKeyInit(JNIEnv *env, jobject thiz, jstring 
 
     QCard_BLOCKCIPHERPARAM KeyParam;
     memset(&KeyParam, 0, sizeof(KeyParam));
-//    KeyParam.PaddingType = 1;
+    KeyParam.PaddingType = 1;
     KEYHANDLE keyHandle = nullptr;
 
     int ret = QCard_AuthSynFlagKeyInit(devHandle, peerStoreId, syncFlag, SGD_SM1_CBC, KeyParam, appName, conName, pin, TAC_SAFE_CLEARR, &keyHandle);
@@ -446,21 +446,21 @@ Java_com_qasky_tfcard_QTF_test(JNIEnv *env, jobject thiz) {
 
     char *syncFlag = nullptr;
     unsigned long flagLen = 0;
-     ret = QCard_ReadAuthSynFlag(devHandle, "343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", syncFlag, &flagLen);
+     ret = QCard_ReadAuthSynFlag(devHandle, "343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", syncFlag, &flagLen);
     LOGD("QCard_ReadAuthSynFlag ret = %X flagLen = %d syncFlag = %s", ret, flagLen, syncFlag);
     syncFlag = (char *) malloc(flagLen);
     memset(syncFlag, 0, flagLen);
-    ret = QCard_ReadAuthSynFlag(devHandle, "343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", syncFlag, &flagLen);
+    ret = QCard_ReadAuthSynFlag(devHandle, "343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", syncFlag, &flagLen);
     LOGD("QCard_ReadAuthSynFlag ret = %X flagLen = %d syncFlag = %s", ret, flagLen, syncFlag);
 
-    ret = QCard_AuthSynFlag(devHandle, "343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", syncFlag);
-    LOGD("QCard_AuthSynFlag ret = %X", ret);
+//    ret = QCard_AuthSynFlag(devHandle, "343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", syncFlag);
+//    LOGD("QCard_AuthSynFlag ret = %X", ret);
 
     QCard_BLOCKCIPHERPARAM KeyParam;
     memset(&KeyParam, 0, sizeof(KeyParam));
-    KeyParam.PaddingType = 0;
+    KeyParam.PaddingType = 1;
     KEYHANDLE keyHandle = nullptr;
 
-    ret = QCard_AuthSynFlagKeyInit(devHandle, "343048353201454EFFFFFFFF", syncFlag, SGD_SM1_CBC, KeyParam, "QTFCTC", "QTFCTC", "12222222", TAC_SAFE_CLEARR, &keyHandle);
+    ret = QCard_AuthSynFlagKeyInit(devHandle, "343048353201355DFFFFFFFF", syncFlag, SGD_SM1_CBC, KeyParam, "QTFCTC", "QTFCTC", "12222222", TAC_SAFE_CLEARR, &keyHandle);
     LOGD("QCard_AuthSynFlagKeyInit ret = %X keyHandle = %p", ret, keyHandle);
 }
