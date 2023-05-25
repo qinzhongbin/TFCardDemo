@@ -8,6 +8,7 @@ public class QTF {
 
 
     public native void LogSetCallBack();
+
     /**
      * 枚举设备
      *
@@ -226,4 +227,7 @@ public class QTF {
      * @return 密钥句柄
      */
     public native long AuthSynFlagKeyInit(String peerStoreId, String appName, String conName, String pin, String syncFlag);
+
+
+    public native void test();
 }

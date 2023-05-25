@@ -293,44 +293,47 @@ public class MainActivity extends AppCompatActivity {
                             String storeId = qtf.GetStoreId();
                             String systemId = qtf.GetSystemId("QTFCTC", "QTFCTC");
                             int keyLen = qtf.QueryKey(storeId, "QTFCTC", "QTFCTC");
-                            qtf.QueryKey("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC");
+                            qtf.QueryKey("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC");
 
-                            qtf.ReadAuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
 
-//                            String authSynFlag = "{\n" +
-//                                    "\t\"checkCode\":\t\"CTykldomsVb1N5HiUeXbMDu7QGeshbVcr1hrn+iChvc=\",\n" +
-//                                    "\t\"flag\":\t{\n" +
-//                                    "\t\t\"storeId\":\t\"343048353201454EFFFFFFFF\",\n" +
-//                                    "\t\t\"unitId\":\t\"aa525648d66946998ee61eb7976ae490\",\n" +
-//                                    "\t\t\"blockId\":\t\"f3629cc4f7b745be9283ea36380e5f08\",\n" +
-//                                    "\t\t\"offsetIndex\":\t0,\n" +
-//                                    "\t\t\"encodeType\":\t\"SGD_SM1_ECB\",\n" +
-//                                    "\t\t\"keyLen\":\t16,\n" +
-//                                    "\t\t\"random\":\t\"up99cXOFBnMkhM2LupB7rg==\",\n" +
-//                                    "\t\t\"code\":\t0,\n" +
-//                                    "\t\t\"errorMsg\":\t\"\"\n" +
-//                                    "\t}\n" +
-//                                    "}";
-//                            if (qtf.AuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
-//                                long keyHandle = qtf.AuthSynFlagKeyInit("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
-//
-//                                byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
-//                                byte[] plain = qtf.Decrypt(keyHandle, cipher);
-//                                LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
-//
-//                                byte[] softKey = qtf.ExportKey(keyHandle, 16);
-//                                LogUtils.d("软密钥：" + ConvertUtils.bytes2HexString(softKey));
-//                                try {
-//                                    cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
-//                                    plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
-//                                } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
-//                                    throw new RuntimeException(e);
-//                                }
-//
-//                                LogUtils.d("明文：", new String(plain, StandardCharsets.UTF_8));
-//
-//                                qtf.KeyFinal(keyHandle);
-//                            }
+
+                            String authSynFlag = "{\n" +
+                                    "                                                                                                    \t\"checkCode\":\t\"FR2KqRzhFvtigFWAMjq+uF70HlLmZEPC5AzmvizFTSA=\",\n" +
+                                    "                                                                                                    \t\"flag\":\t{\n" +
+                                    "                                                                                                    \t\t\"storeId\":\t\"343048353201355DFFFFFFFF\",\n" +
+                                    "                                                                                                    \t\t\"unitId\":\t\"cac7de1bdb054176bd94d3e6b7ddf1cb\",\n" +
+                                    "                                                                                                    \t\t\"blockId\":\t\"3cf74c95cac44548ab24d03a63b6db03\",\n" +
+                                    "                                                                                                    \t\t\"offsetIndex\":\t32,\n" +
+                                    "                                                                                                    \t\t\"encodeType\":\t\"SGD_SM1_ECB\",\n" +
+                                    "                                                                                                    \t\t\"keyLen\":\t16,\n" +
+                                    "                                                                                                    \t\t\"random\":\t\"Ap/A49JbgMCYIHOpC8oUfg==\",\n" +
+                                    "                                                                                                    \t\t\"code\":\t0,\n" +
+                                    "                                                                                                    \t\t\"errorMsg\":\t\"\"\n" +
+                                    "                                                                                                    \t}\n" +
+                                    "                                                                                                    }";
+                            if (qtf.AuthSynFlag("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
+
+                                authSynFlag = qtf.ReadAuthSynFlag("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
+
+                                long keyHandle = qtf.AuthSynFlagKeyInit("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
+
+                                byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+                                byte[] plain = qtf.Decrypt(keyHandle, cipher);
+                                LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
+
+                                byte[] softKey = qtf.ExportKey(keyHandle, 16);
+                                LogUtils.d("软密钥：" + ConvertUtils.bytes2HexString(softKey));
+                                try {
+                                    cipher = SM4Util.encrypt_CBC_Padding(softKey, zeroIV, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
+                                    plain = SM4Util.decrypt_CBC_Padding(softKey, zeroIV, cipher);
+                                } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                                LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
+
+                                qtf.KeyFinal(keyHandle);
+                            }
                             qtf.UpdateResource();
                             qtf.DestroyResource();
                         }
@@ -342,6 +345,10 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    public void TEST(View view) {
+        qtf.LogSetCallBack();
+        qtf.test();
+    }
 //    public void TEST(View view) {
 //        new Thread(new Runnable() {
 //            @Override
@@ -383,76 +390,76 @@ public class MainActivity extends AppCompatActivity {
 //        }).start();
 //    }
 
-    public void TEST(View view) {
-        qtf.EnumStoreHandle(getPackageName());
-        qtf.Login();
-        qtf.InitResource();
-        long keyHandle = qtf.ExternalKeyInit("1234567890123456".getBytes());
-
-
-
-
-        new Thread(new Runnable() {
-            @SuppressLint("DefaultLocale")
-            @Override
-            public void run() {
-                long id = Thread.currentThread().getId();
-                LogUtils.e("启动新线程进行测试: " + id);
-
-                byte[] plain = new byte[1024 * 1024 * 1];
-                Arrays.fill(plain, (byte) 0x31);
-                for (int i = 0; i < 100; i++) {
-                    long start = System.currentTimeMillis();
-                    byte[] cipher = qtf.Encrypt(keyHandle, plain);
-                    long endEncrypt = System.currentTimeMillis();
-                    byte[] result = qtf.Decrypt(keyHandle, cipher);
-                    long endDecrypt = System.currentTimeMillis();
-                    LogUtils.e(id  + "==>" + String.format("耗时测试[%d]结果: 数据长度 %d， 编码耗时 %dms， 解码耗时 %dms\n", i, plain.length, endEncrypt - start, endDecrypt - endEncrypt));
-                }
-            }
-        }).start();
-
-        new Thread(new Runnable() {
-            @SuppressLint("DefaultLocale")
-            @Override
-            public void run() {
-                long id = Thread.currentThread().getId();
-                LogUtils.e("启动新线程进行测试: " + id);
-                byte[] cipher = new byte[]{
-                        -29, -67, 102, -2, 68, -104, -102, 48, 9, -48, 88, 62, -98, 16, 27, -51, 32, -21, -45, -80, -14, -98, 80, 124, 17, -46, -33, -73, 21, -123, -97, 96, 126, 109, 104, -9, -24, 88, -48, 34, 80, -102, -57, -114, -64, -124, -120, 71, 127, 41, 53, -71, -99, 99, -14, 102, -15, 93, 66, 20, 12, 53, 84, -65, 23, 39, -57, 31, 61, -89, 13, -126, 5, -104, 101, -64, -90, -72, -89, -8, -14, 74, 48, 61, -49, 90, 89, 118, -109, -90, -49, -75, -47, -81, -23, 98, -25, -76, 31, -106, -48, 65, -104, 4, -21, -55, -17, -69, -37, 118, -71, -81, -127, -82, -107, 125, -46, 33, 50, 10, -6, 126, -124, 53, 14, 83, 19, 110, 23, 125, -116, 16, -81, -94, -112, -109, -79, 22, 8, 68, -19, -23, -93, -128
-                };
-
-                for (int i = 0; i < 100; i++) {
-                    long start = System.currentTimeMillis();
-                    byte[] result = qtf.Decrypt(keyHandle, cipher);
-//                    LogUtils.e("解密后数据:" + Arrays.toString(result));
-                    long endEncrypt = System.currentTimeMillis();
-                    byte[] plain = qtf.Encrypt(keyHandle, result);
-                    long endDecrypt = System.currentTimeMillis();
-                    LogUtils.e(id + "==>" + String.format("耗时测试[%d]结果: 数据长度 %d， 编码耗时 %dms， 解码耗时 %dms\n", i, cipher.length, endEncrypt - start, endDecrypt - endEncrypt));
-                }
-            }
-        }).start();
-
-
-        new Thread(new Runnable() {
-            @SuppressLint("DefaultLocale")
-            @Override
-            public void run() {
-                long id = Thread.currentThread().getId();
-                LogUtils.e("启动新线程进行测试: " + id);
-
-                byte[] plain = new byte[1024 * 1024 * 1];
-                Arrays.fill(plain, (byte) 0x51);
-                for (int i = 0; i < 100; i++) {
-                    long start = System.currentTimeMillis();
-                    byte[] cipher = qtf.Encrypt(keyHandle, plain);
-                    long endEncrypt = System.currentTimeMillis();
-                    byte[] result = qtf.Decrypt(keyHandle, cipher);
-                    long endDecrypt = System.currentTimeMillis();
-                    LogUtils.e(id  + "==>" + String.format("耗时测试[%d]结果: 数据长度 %d， 编码耗时 %dms， 解码耗时 %dms\n", i, plain.length, endEncrypt - start, endDecrypt - endEncrypt));
-                }
-            }
-        }).start();
-    }
+//    public void TEST(View view) {
+////        qtf.EnumStoreHandle(getPackageName());
+////        qtf.Login();
+////        qtf.InitResource();
+////        long keyHandle = qtf.ExternalKeyInit("1234567890123456".getBytes());
+////
+////
+////
+////
+////        new Thread(new Runnable() {
+////            @SuppressLint("DefaultLocale")
+////            @Override
+////            public void run() {
+////                long id = Thread.currentThread().getId();
+////                LogUtils.e("启动新线程进行测试: " + id);
+////
+////                byte[] plain = new byte[1024 * 1024 * 1];
+////                Arrays.fill(plain, (byte) 0x31);
+////                for (int i = 0; i < 100; i++) {
+////                    long start = System.currentTimeMillis();
+////                    byte[] cipher = qtf.Encrypt(keyHandle, plain);
+////                    long endEncrypt = System.currentTimeMillis();
+////                    byte[] result = qtf.Decrypt(keyHandle, cipher);
+////                    long endDecrypt = System.currentTimeMillis();
+////                    LogUtils.e(id  + "==>" + String.format("耗时测试[%d]结果: 数据长度 %d， 编码耗时 %dms， 解码耗时 %dms\n", i, plain.length, endEncrypt - start, endDecrypt - endEncrypt));
+////                }
+////            }
+////        }).start();
+////
+////        new Thread(new Runnable() {
+////            @SuppressLint("DefaultLocale")
+////            @Override
+////            public void run() {
+////                long id = Thread.currentThread().getId();
+////                LogUtils.e("启动新线程进行测试: " + id);
+////                byte[] cipher = new byte[]{
+////                        -29, -67, 102, -2, 68, -104, -102, 48, 9, -48, 88, 62, -98, 16, 27, -51, 32, -21, -45, -80, -14, -98, 80, 124, 17, -46, -33, -73, 21, -123, -97, 96, 126, 109, 104, -9, -24, 88, -48, 34, 80, -102, -57, -114, -64, -124, -120, 71, 127, 41, 53, -71, -99, 99, -14, 102, -15, 93, 66, 20, 12, 53, 84, -65, 23, 39, -57, 31, 61, -89, 13, -126, 5, -104, 101, -64, -90, -72, -89, -8, -14, 74, 48, 61, -49, 90, 89, 118, -109, -90, -49, -75, -47, -81, -23, 98, -25, -76, 31, -106, -48, 65, -104, 4, -21, -55, -17, -69, -37, 118, -71, -81, -127, -82, -107, 125, -46, 33, 50, 10, -6, 126, -124, 53, 14, 83, 19, 110, 23, 125, -116, 16, -81, -94, -112, -109, -79, 22, 8, 68, -19, -23, -93, -128
+////                };
+////
+////                for (int i = 0; i < 100; i++) {
+////                    long start = System.currentTimeMillis();
+////                    byte[] result = qtf.Decrypt(keyHandle, cipher);
+//////                    LogUtils.e("解密后数据:" + Arrays.toString(result));
+////                    long endEncrypt = System.currentTimeMillis();
+////                    byte[] plain = qtf.Encrypt(keyHandle, result);
+////                    long endDecrypt = System.currentTimeMillis();
+////                    LogUtils.e(id + "==>" + String.format("耗时测试[%d]结果: 数据长度 %d， 编码耗时 %dms， 解码耗时 %dms\n", i, cipher.length, endEncrypt - start, endDecrypt - endEncrypt));
+////                }
+////            }
+////        }).start();
+////
+////
+////        new Thread(new Runnable() {
+////            @SuppressLint("DefaultLocale")
+////            @Override
+////            public void run() {
+////                long id = Thread.currentThread().getId();
+////                LogUtils.e("启动新线程进行测试: " + id);
+////
+////                byte[] plain = new byte[1024 * 1024 * 1];
+////                Arrays.fill(plain, (byte) 0x51);
+////                for (int i = 0; i < 100; i++) {
+////                    long start = System.currentTimeMillis();
+////                    byte[] cipher = qtf.Encrypt(keyHandle, plain);
+////                    long endEncrypt = System.currentTimeMillis();
+////                    byte[] result = qtf.Decrypt(keyHandle, cipher);
+////                    long endDecrypt = System.currentTimeMillis();
+////                    LogUtils.e(id  + "==>" + String.format("耗时测试[%d]结果: 数据长度 %d， 编码耗时 %dms， 解码耗时 %dms\n", i, plain.length, endEncrypt - start, endDecrypt - endEncrypt));
+////                }
+////            }
+////        }).start();
+//    }
 }
