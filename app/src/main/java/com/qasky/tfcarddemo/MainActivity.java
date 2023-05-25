@@ -294,11 +294,24 @@ public class MainActivity extends AppCompatActivity {
                             String systemId = qtf.GetSystemId("QTFCTC", "QTFCTC");
                             qtf.QueryKey("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC");
 
+                            qtf.ReadAuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
 
-                            String authSynFlag = qtf.ReadAuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222");
+                            String authSynFlag = "{\n" +
+                                    "\t\"checkCode\":\t\"0RbMukOvNzQ3HMJlzTLraa6OeffiHpVqATblXr+vO7U=\",\n" +
+                                    "\t\"flag\":\t{\n" +
+                                    "\t\t\"storeId\":\t\"343048353201454EFFFFFFFF\",\n" +
+                                    "\t\t\"unitId\":\t\"fa190a82e4444ac18d34e558787892a6\",\n" +
+                                    "\t\t\"blockId\":\t\"5edafcba9d37475ebc7edc0c6cd42df7\",\n" +
+                                    "\t\t\"offsetIndex\":\t32,\n" +
+                                    "\t\t\"encodeType\":\t\"SGD_SM1_ECB\",\n" +
+                                    "\t\t\"keyLen\":\t16,\n" +
+                                    "\t\t\"random\":\t\"iUS7TUf6cH75lQzqfzUDgA==\",\n" +
+                                    "\t\t\"code\":\t0,\n" +
+                                    "\t\t\"errorMsg\":\t\"\"\n" +
+                                    "\t}\n" +
+                                    "}";
 
-//                            if (qtf.AuthSynFlag("343048353201454EFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
-
+                            if (qtf.AuthSynFlag("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag)) {
 
                             long keyHandle = qtf.AuthSynFlagKeyInit("343048353201355DFFFFFFFF", "QTFCTC", "QTFCTC", "12222222", authSynFlag);
 
@@ -318,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
                             LogUtils.d("明文：" + new String(plain, StandardCharsets.UTF_8));
 
                             qtf.KeyFinal(keyHandle);
-//                            }
+                            }
                             qtf.UpdateResource();
                             qtf.DestroyResource();
                         }
