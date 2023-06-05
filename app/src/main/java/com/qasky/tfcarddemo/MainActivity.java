@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         byte[] cutProtectKey = Arrays.copyOfRange(SM3Util.hash("123456".getBytes(StandardCharsets.UTF_8)), 0, 16);
         byte[] keys = new byte[0];
         try {
-            keys = SM4Util.decrypt_CBC_Padding(cutProtectKey, zeroIV, Base64.decode("JLz3wNv1g8cTbiOBMaE+xl+lEzvqeqYKghYk+rJZxAa8c+Aq8VCeMxi7u0a7vaHVWOjuePeXoM7JFEeAZy64xA==".getBytes(StandardCharsets.UTF_8)));
+            keys = SM4Util.decrypt_CBC_Padding(cutProtectKey, zeroIV, Base64.decode("FHKCSSwRjWXx2vMdo2iKpiYBUk/48glyMcmZ3nG3GlHJDwtAvJOCJnewjCfLopylXKPL/EdxJRnPhbODAoeVcw==".getBytes(StandardCharsets.UTF_8)));
         } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
@@ -181,13 +181,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
+                    qtf.LogSetCallBack();
                     if (qtf.EnumStoreHandle(getPackageName())) {
                         if (qtf.Login()) {
                             if (qtf.InitResource()) {
                                 String storeId = qtf.GetStoreId();
-                                int keyLength = qtf.QueryKey(storeId, "QTFCTS", "QTFCTS");
-                                qtf.ProxyOnlineChargingKey("112.27.97.202:8890", "QTFCTS", "QTFCTS", "12222222", 16);
-                                String systemId = qtf.GetSystemId("QTFCTS", "QTFCTS");
+                                int keyLength = qtf.QueryKey(storeId, "wlc2snew", "wlc2snew");
+//                                qtf.ProxyOnlineChargingKey("112.27.97.202:8890", "QTFCTS", "QTFCTS", "12222222", 16);
+                                String systemId = qtf.GetSystemId("wlc2snew", "wlc2snew");
 
                                 // step 1: 服务端创建在线业务密钥
                                 Calendar calendar = Calendar.getInstance();
@@ -202,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                                 createRequest.setHmac(Base64.toBase64String(SM3Util.hmac(hmacKey, authMsg_create.getBytes(StandardCharsets.UTF_8))));
 
                                 Response response_create = okHttpClient.newCall(new Request.Builder()
-                                        .url("https://112.27.97.202:8890/onlinebizkey/createOnlineBizKey")
+                                        .url("https://112.27.97.202:48890/onlinebizkey/createOnlineBizKey")
                                         .post(RequestBody.create(GsonUtils.toJson(createRequest), MediaType.parse("application/json; charset=utf-8")))
                                         .build()).execute();
                                 if (response_create.isSuccessful()) {
@@ -219,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                                         String authMsg_svrNego = svrNegoReq.getSecretId() + "," + svrNegoReq.getSystemId() + "," + svrNegoReq.getServerId() + "," + svrNegoReq.getTimestamp();
                                         svrNegoReq.setHmac(Base64.toBase64String(SM3Util.hmac(hmacKey, authMsg_svrNego.getBytes(StandardCharsets.UTF_8))));
                                         Response response_svrNego = okHttpClient.newCall(new Request.Builder()
-                                                .url("https://112.27.97.202:8890/onlinebizkey/serverNegotiateOnlineBizKey")
+                                                .url("https://112.27.97.202:48890/onlinebizkey/serverNegotiateOnlineBizKey")
                                                 .post(RequestBody.create(GsonUtils.toJson(svrNegoReq), MediaType.parse("application/json; charset=utf-8")))
                                                 .build()).execute();
                                         if (response_svrNego.isSuccessful()) {
@@ -232,9 +233,9 @@ public class MainActivity extends AppCompatActivity {
 
                                                 // step 3: 客户端协商在线业务密钥
                                                 Thread.sleep(1000L); // 客户端协商时间应比服务端协商时间晚，模拟延时操作。
-                                                NegotiateInfo negotiateInfo = qtf.ClientRequestOnlineBizKey("112.27.97.202:8890", storeId, systemId, secretId, "WT-QKMS100_001", "JLz3wNv1g8cTbiOBMaE+xl+lEzvqeqYKghYk+rJZxAa8c+Aq8VCeMxi7u0a7vaHVWOjuePeXoM7JFEeAZy64xA==", "123456");
+                                                NegotiateInfo negotiateInfo = qtf.ClientRequestOnlineBizKey("112.27.97.202:48890", storeId, systemId, secretId, "WT-QKMS100_001", "FHKCSSwRjWXx2vMdo2iKpiYBUk/48glyMcmZ3nG3GlHJDwtAvJOCJnewjCfLopylXKPL/EdxJRnPhbODAoeVcw==", "123456");
 
-                                                long keyHandle = qtf.ClientKeyInit("QTFCTS", "QTFCTS", "12222222", negotiateInfo.getCheckCode(), negotiateInfo.getFlag());
+                                                long keyHandle = qtf.ClientKeyInit("wlc2snew", "wlc2snew", "12222222", negotiateInfo.getCheckCode(), negotiateInfo.getFlag());
 
                                                 byte[] cipher = qtf.Encrypt(keyHandle, "君不见，黄河之水天上来。".getBytes(StandardCharsets.UTF_8));
                                                 byte[] plain = qtf.Decrypt(keyHandle, cipher);
@@ -258,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
                                                 String authMsg_clean = cleanRequest.getSecretId() + "," + cleanRequest.getSystemId() + "," + cleanRequest.getServerId() + "," + cleanRequest.getTimestamp();
                                                 cleanRequest.setHmac(Base64.toBase64String(SM3Util.hmac(hmacKey, authMsg_clean.getBytes(StandardCharsets.UTF_8))));
                                                 Response response_clean = okHttpClient.newCall(new Request.Builder()
-                                                        .url("https://112.27.97.202:8890/onlinebizkey/cleanNegotiateOnlineBizKey")
+                                                        .url("https://112.27.97.202:48890/onlinebizkey/cleanNegotiateOnlineBizKey")
                                                         .post(RequestBody.create(GsonUtils.toJson(cleanRequest), MediaType.parse("application/json; charset=utf-8"))).build()).execute();
                                                 if (response_clean.isSuccessful()) {
                                                     CleanOLBizKeyResp cleanResponse = GsonUtils.fromJson(response_clean.body().string(), CleanOLBizKeyResp.class);
